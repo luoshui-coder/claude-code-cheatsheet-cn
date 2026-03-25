@@ -161,13 +161,13 @@ const html = (ctx) => `<!DOCTYPE html>
             ${row(duo(`${keycap('Ctrl')}${keycap('L')}`, `${keycap('Ctrl')}${keycap('L')}`), '清空屏幕')}
             ${row(duo(`${keycap('Ctrl')}${keycap('O')}`, `${keycap('Ctrl')}${keycap('O')}`), '切换详细输出')}
             ${row(duo(`${keycap('Ctrl')}${keycap('R')}`, `${keycap('Ctrl')}${keycap('R')}`), '反向搜索历史')}
-            ${row(duo(`${keycap('Ctrl')}${keycap('G')}`, `${keycap('Ctrl')}${keycap('G')}`), '在编辑器中打开当前输入')}
-            ${row(duo(`${keycap('Ctrl')}${keycap('B')}`, `${keycap('Ctrl')}${keycap('B')}`), '把当前任务转入后台')}
-            ${row(duo(`${keycap('Ctrl')}${keycap('T')}`, `${keycap('Ctrl')}${keycap('T')}`), '切换任务列表')}
+            ${row(duo(`${keycap('Cmd')}${keycap('K')}`, `${keycap('Ctrl')}${keycap('K')}`), '在编辑器中打开当前输入')}
+            ${row(duo(`${keycap('Cmd')}${keycap('B')}`, `${keycap('Ctrl')}${keycap('B')}`), '把当前任务转入后台')}
+            ${row(duo(`${keycap('Cmd')}${keycap('T')}`, `${keycap('Ctrl')}${keycap('T')}`), '切换任务列表')}
             <div class="sub-header">模式切换</div>
             ${row(duo(`${keycap('Shift')}${keycap('Tab')}`, `${keycap('Shift')}${keycap('Tab')}`), '轮换权限模式')}
-            ${row(duo(`${keycap('Alt')}${keycap('P')}`, `${keycap('Alt')}${keycap('P')}`), '切换模型')}
-            ${row(duo(`${keycap('Alt')}${keycap('T')}`, `${keycap('Alt')}${keycap('T')}`), '开 / 关 thinking')}
+            ${row(duo(`${keycap('Option')}${keycap('P')}`, `${keycap('Alt')}${keycap('P')}`), '切换模型')}
+            ${row(duo(`${keycap('Option')}${keycap('T')}`, `${keycap('Alt')}${keycap('T')}`), '开 / 关 thinking')}
             <div class="sub-header">输入前缀</div>
             ${row('/', 'Slash 命令')}
             ${row('!', '直接执行 bash')}
@@ -266,7 +266,7 @@ const html = (ctx) => `<!DOCTYPE html>
             ${row(duo(`${keycap('Shift')}${keycap('Tab')}`, `${keycap('Shift')}${keycap('Tab')}`), '普通 → 自动接受 → 计划模式')}
             ${row('--permission-mode plan', '启动即进入计划模式')}
             <div class="sub-header">Thinking 与 Effort</div>
-            ${row(duo(`${keycap('Alt')}${keycap('T')}`, `${keycap('Alt')}${keycap('T')}`), '开 / 关 thinking')}
+            ${row(duo(`${keycap('Option')}${keycap('T')}`, `${keycap('Alt')}${keycap('T')}`), '开 / 关 thinking')}
             ${row('"ultrathink"', '当前轮次最大努力')}
             ${row('/effort', 'low / med / high<span class="badge-new">NEW</span>')}
             <div class="sub-header">Git Worktree</div>
