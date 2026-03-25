@@ -164,6 +164,9 @@ const html = (ctx) => `<!DOCTYPE html>
             ${row(duo(`${keycap('Cmd')}${keycap('K')}`, `${keycap('Ctrl')}${keycap('K')}`), '在编辑器中打开当前输入')}
             ${row(duo(`${keycap('Cmd')}${keycap('B')}`, `${keycap('Ctrl')}${keycap('B')}`), '把当前任务转入后台')}
             ${row(duo(`${keycap('Cmd')}${keycap('T')}`, `${keycap('Ctrl')}${keycap('T')}`), '切换任务列表')}
+            ${row(duo(`${keycap('Ctrl')}${keycap('V')}`, `${keycap('Ctrl')}${keycap('V')}`), '粘贴图片')}
+            ${row(duo(`${keycap('Ctrl')}${keycap('F')}`, `${keycap('Ctrl')}${keycap('F')}`), '强制终止后台 agent（按两次）')}
+            ${row(duo(`${keycap('Esc')}${keycap('Esc')}`, `${keycap('Esc')}${keycap('Esc')}`), '回退 / 撤销到上一层')}
             <div class="sub-header">模式切换</div>
             ${row(duo(`${keycap('Shift')}${keycap('Tab')}`, `${keycap('Shift')}${keycap('Tab')}`), '轮换权限模式')}
             ${row(duo(`${keycap('Option')}${keycap('P')}`, `${keycap('Alt')}${keycap('P')}`), '切换模型')}
@@ -216,26 +219,47 @@ const html = (ctx) => `<!DOCTYPE html>
             ${row('/cost', '查看 token / 成本')}
             ${row('/context', '可视化上下文占用')}
             ${row('/diff', '交互式查看 diff')}
+            ${row('/copy', '复制最近一条回复')}
+            ${row('/export', '导出当前对话')}
             <div class="sub-header">配置</div>
             ${row('/config', '打开设置')}
-            ${row('/model [model]', '切换模型')}
+            ${row('/model [model]', '切换模型（←→ 调 effort）')}
+            ${row('/fast [on|off]', '切换快速模式')}
+            ${row('/vim', '切换 vim 模式')}
+            ${row('/theme', '更换颜色主题')}
             ${row('/permissions', '查看 / 修改权限')}
-            ${row('/effort [level]', '设置努力等级 low/med/high/max<span class="badge-new">NEW</span>')}
+            ${row('/effort [level]', '设置努力等级 low/med/high/max/auto<span class="badge-new">NEW</span>')}
             ${row('/color [color]', '设置提示条颜色')}
+            ${row('/keybindings', '自定义键位映射')}
+            ${row('/terminal-setup', '配置终端快捷键')}
             <div class="sub-header">工具</div>
             ${row('/init', '生成 CLAUDE.md')}
-            ${row('/memory', '编辑记忆文件')}
+            ${row('/memory', '编辑 CLAUDE.md 文件')}
+            ${row('/mcp', '管理 MCP 服务器')}
             ${row('/hooks', '管理 hooks')}
             ${row('/skills', '查看可用 skills')}
             ${row('/agents', '管理 agents')}
+            ${row('/chrome', 'Chrome 集成')}
+            ${row('/reload-plugins', '热重载插件')}
+            ${row('/add-dir <path>', '添加工作目录')}
             <div class="sub-header">特殊</div>
             ${row('/btw <question>', '侧问，不吃主上下文')}
-            ${row('/plan [desc]', '进入计划模式')}
+            ${row('/plan [desc]', '计划模式（可自动开始）')}
             ${row('/loop [interval]', '周期任务')}
-            ${row('/voice', '语音模式')}
+            ${row('/voice', '按住说话语音模式（20 种语言）')}
             ${row('/doctor', '诊断安装问题')}
-            ${row('/rc', '远程控制 / 网页桥接<span class="badge-new">NEW</span>')}
-            ${row('/help', '查看帮助')}
+            ${row('/pr-comments [PR]', '拉取 GitHub PR 评论')}
+            ${row('/stats', '查看使用 streak / 偏好统计')}
+            ${row('/insights', '分析会话洞察报告')}
+            ${row('/desktop', '切到 Desktop app 继续')}
+            ${row('/remote-control', '桥接到 claude.ai/code（/rc）<span class="badge-new">NEW</span>')}
+            ${row('/usage', '查看套餐限额和速率状态')}
+            ${row('/schedule', '云端定时任务')}
+            ${row('/security-review', '变更安全审查')}
+            ${row('/help', '显示帮助与命令列表')}
+            ${row('/feedback', '提交反馈（/bug 别名）')}
+            ${row('/release-notes', '查看完整更新日志')}
+            ${row('/stickers', '订贴纸 🎉')}
           </div>
         </section>
 
@@ -345,11 +369,21 @@ const html = (ctx) => `<!DOCTYPE html>
             ${row('model', '指定 skill 使用模型')}
             ${row('effort', '覆盖默认 effort<span class="badge-new">NEW</span>')}
             ${row('context: fork', '在子 agent 中运行')}
+            ${row('$ARGUMENTS', '用户输入占位符')}
+            ${row('${CLAUDE_SKILL_DIR}', 'skill 自己的目录')}
+            ${row('!`cmd`', '动态注入命令输出上下文')}
             <div class="sub-header">内置 Agents</div>
             ${row('Explore', '快速只读探索（Haiku）')}
             ${row('Plan', '计划模式研究 agent')}
             ${row('General', '全工具复杂任务')}
             ${row('Bash', '独立终端上下文 agent')}
+            <div class="sub-header">Agent Frontmatter</div>
+            ${row('permissionMode', 'default / acceptEdits / plan / dontAsk / bypass')}
+            ${row('isolation: worktree', '在 git worktree 中运行')}
+            ${row('memory: user|project', '持久化记忆范围')}
+            ${row('background: true', '后台任务')}
+            ${row('maxTurns', '限制 agent 轮数')}
+            ${row('SendMessage', '恢复 agent（取代 resume）<span class="badge-new">NEW</span>')}
           </div>
         </section>
 
