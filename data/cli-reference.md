@@ -1,10 +1,4 @@
-Complete reference for Claude Code command-line interface, including commands and flags.
-
-Copy page
-
-## [​](https://code.claude.com/docs/en/cli-reference#cli-commands)
-
-CLI commands
+## CLI commands
 
 You can start sessions, pipe content, resume conversations, and manage updates with these commands:
 
@@ -26,9 +20,7 @@ You can start sessions, pipe content, resume conversations, and manage updates w
 | `claude mcp` | Configure Model Context Protocol (MCP) servers | See the [Claude Code MCP documentation](https://code.claude.com/docs/en/mcp). |
 | `claude remote-control` | Start a [Remote Control](https://code.claude.com/docs/en/remote-control) server to control Claude Code from Claude.ai or the Claude app. Runs in server mode (no local interactive session). See [Server mode flags](https://code.claude.com/docs/en/remote-control#server-mode) | `claude remote-control --name "My Project"` |
 
-## [​](https://code.claude.com/docs/en/cli-reference#cli-flags)
-
-CLI flags
+## CLI flags
 
 Customize Claude Code’s behavior with these command-line flags:
 
@@ -91,9 +83,7 @@ Customize Claude Code’s behavior with these command-line flags:
 | `--version`, `-v` | Output the version number | `claude -v` |
 | `--worktree`, `-w` | Start Claude in an isolated [git worktree](https://code.claude.com/docs/en/common-workflows#run-parallel-claude-code-sessions-with-git-worktrees) at `<repo>/.claude/worktrees/<name>`. If no name is given, one is auto-generated | `claude -w feature-auth` |
 
-### [​](https://code.claude.com/docs/en/cli-reference#system-prompt-flags)
-
-System prompt flags
+### System prompt flags
 
 Claude Code provides four flags for customizing the system prompt. All four work in both interactive and non-interactive modes.
 
@@ -105,9 +95,8 @@ Claude Code provides four flags for customizing the system prompt. All four work
 | `--append-system-prompt-file` | Appends file contents to the default prompt | `claude --append-system-prompt-file ./style-rules.txt` |
 
 `--system-prompt` and `--system-prompt-file` are mutually exclusive. The append flags can be combined with either replacement flag.For most use cases, use an append flag. Appending preserves Claude Code’s built-in capabilities while adding your requirements. Use a replacement flag only when you need complete control over the system prompt.
-## [​](https://code.claude.com/docs/en/cli-reference#see-also)
 
-See also
+## See also
 
 *   [Chrome extension](https://code.claude.com/docs/en/chrome) - Browser automation and web testing
 *   [Interactive mode](https://code.claude.com/docs/en/interactive-mode) - Shortcuts, input modes, and interactive features
@@ -115,35 +104,3 @@ See also
 *   [Common workflows](https://code.claude.com/docs/en/common-workflows) - Advanced workflows and patterns
 *   [Settings](https://code.claude.com/docs/en/settings) - Configuration options
 *   [Agent SDK documentation](https://platform.claude.com/docs/en/agent-sdk/overview) - Programmatic usage and integrations
-
-Was this page helpful?
-
-Yes No
-
-[Built-in commands](https://code.claude.com/docs/en/commands)
-
-⌘I
-
-[Claude Code Docs home page![Image 4: light logo](https://mintcdn.com/claude-code/c5r9_6tjPMzFdDDT/logo/light.svg?fit=max&auto=format&n=c5r9_6tjPMzFdDDT&q=85&s=78fd01ff4f4340295a4f66e2ea54903c)![Image 5: dark logo](https://mintcdn.com/claude-code/c5r9_6tjPMzFdDDT/logo/dark.svg?fit=max&auto=format&n=c5r9_6tjPMzFdDDT&q=85&s=1298a0c3b3a1da603b190d0de0e31712)](https://code.claude.com/docs/en/overview)
-
-[x](https://x.com/AnthropicAI)[linkedin](https://www.linkedin.com/company/anthropicresearch)
-
-Company
-
-[Anthropic](https://www.anthropic.com/company)[Careers](https://www.anthropic.com/careers)[Economic Futures](https://www.anthropic.com/economic-futures)[Research](https://www.anthropic.com/research)[News](https://www.anthropic.com/news)[Trust center](https://trust.anthropic.com/)[Transparency](https://www.anthropic.com/transparency)
-
-Help and security
-
-[Availability](https://www.anthropic.com/supported-countries)[Status](https://status.anthropic.com/)[Support center](https://support.claude.com/)
-
-Learn
-
-[Courses](https://www.anthropic.com/learn)[MCP connectors](https://claude.com/partners/mcp)[Customer stories](https://www.claude.com/customers)[Engineering blog](https://www.anthropic.com/engineering)[Events](https://www.anthropic.com/events)[Powered by Claude](https://claude.com/partners/powered-by-claude)[Service partners](https://claude.com/partners/services)[Startups program](https://claude.com/programs/startups)
-
-Terms and policies
-
-[Privacy choices](https://code.claude.com/docs/en/cli-reference#)[Privacy policy](https://www.anthropic.com/legal/privacy)[Disclosure policy](https://www.anthropic.com/responsible-disclosure-policy)[Usage policy](https://www.anthropic.com/legal/aup)[Commercial terms](https://www.anthropic.com/legal/commercial-terms)[Consumer terms](https://www.anthropic.com/legal/consumer-terms)
-
-Assistant
-
-Responses are generated using AI and may contain mistakes.

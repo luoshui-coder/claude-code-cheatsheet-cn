@@ -43,11 +43,24 @@ const focusMainContent = (md, pageTitle) => {
   return (copyPageIdx >= 0 ? fromTitle.slice(copyPageIdx + 'Copy page'.length) : fromTitle).trim();
 };
 
-const pickSection = (md, heading, fallback = '') => {
+const bullets = (text, limit = 8) => text
+  .split('\n')
+  .map((line) => line.trim())
+  .filter((line) => /^[-*]\s+/.test(line))
+  .map((line) => line.replace(/^[-*]\s+/, '').replace(/`/g, '').replace(/\[(.*?)\]\((.*?)\)/g, '$1').replace(/\s+/g, ' ').trim())
+  .filter((line) => line && !/^Copy page$/i.test(line) && line !== '* *')
+  .slice(0, limit);
+
+const sectionFromHeading = (md, heading, limit = 8) => {
   const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp(`^## ${escaped}\\n([\\s\\S]*?)(?=\\n## |$)`, 'm');
+  const re = new RegExp(`## .*?${escaped}[\\s\\S]*?(?=\\n## |$)`, 'i');
   const hit = md.match(re);
-  return hit ? hit[1].trim() : fallback;
+  return hit ? bullets(hit[0], limit) : [];
+};
+
+const firstCodeBlockItems = (md) => {
+  const blocks = [...md.matchAll(/```([\s\S]*?)```/g)].map((m) => m[1].trim());
+  return blocks.flatMap((block) => block.split('\n').map((x) => x.trim()).filter(Boolean));
 };
 
 const pickVersionBlocks = (md, limit = 10) => {
@@ -70,13 +83,7 @@ const pickVersionBlocks = (md, limit = 10) => {
   return blocks;
 };
 
-const bullets = (text, limit = 6) => text
-  .split('\n')
-  .map((line) => line.trim())
-  .filter((line) => /^[-*]\s+/.test(line))
-  .map((line) => line.replace(/^[-*]\s+/, '').replace(/`/g, '').replace(/\[(.*?)\]\((.*?)\)/g, '$1').replace(/\s+/g, ' ').trim())
-  .filter((line) => line && !/^Copy page$/i.test(line) && line !== '* *')
-  .slice(0, limit);
+const makeTable = (pairs) => pairs.map(([k, v]) => ({ key: k, value: v }));
 
 const buildData = (docs) => {
   const overview = docs.overview;
@@ -86,174 +93,211 @@ const buildData = (docs) => {
   const memory = docs.memory;
   const permission = docs['permission-modes'];
   const settings = docs.settings;
-  const cliRef = docs['cli-reference'];
+  const cli = docs['cli-reference'];
   const changelog = docs.changelog;
+
+  const installSnippets = firstCodeBlockItems(overview).filter((x) => /claude|install|brew|winget|curl|irm/.test(x)).slice(0, 8);
+  const quickstartBullets = bullets(quickstart, 10);
 
   return {
     meta: {
-      title: 'Claude Code 中文速查站',
-      description: '面向中文开发者的 Claude Code 单页速查与周更摘要。',
-      generatedAt: new Date().toISOString(),
-      sourceCount: Object.keys(docs).length
+      title: 'Claude Code 命令速查表（中文）',
+      description: '高密度、多分栏、默认中文的 Claude Code 单页速查表，按周自动重建。',
+      generatedAt: new Date().toISOString()
     },
-    hero: {
-      kicker: '面向中文开发者的单页导航',
-      title: 'Claude Code 中文速查站',
-      summary: '不是原站镜像，而是把官方文档、更新日志和常用工作流重组为“先上手、再提效、最后调优”的中文单页。保留高密度速查表气质，但做成更适合移动端滚动阅读的卡片式结构。'
+    header: {
+      title: 'Claude Code 命令速查表',
+      subtitle: '中文重写版 · 高密度速查 · 周更自动重建',
+      summary: '保留 cc.storyfox.cz 的速查表阅读形态：多分栏、卡片密集、查了就走；但内容来源改为官方文档与 changelog，文案按中文开发者习惯重组。'
     },
-    sections: [
+    columns: [
       {
-        id: 'start',
-        name: '上手最快',
-        intro: '先解决“怎么装、在哪用、第一步做什么”。',
-        cards: [
+        id: 'col-1',
+        sections: [
           {
-            title: '安装与入口',
-            body: '优先从 Terminal CLI 开始：进入项目目录后运行 claude。桌面端适合多会话与定时任务，VS Code/JetBrains 适合编辑器内协作。',
-            bullets: bullets(overview, 8)
+            theme: 'keyboard',
+            title: '⌨️ 快速上手',
+            intro: '先安装，再进入项目，再开始会话。',
+            list: [
+              ...installSnippets.slice(0, 5),
+              '进入项目目录后运行：claude',
+              '首次使用先登录，再给目标 + 约束 + 验收'
+            ].slice(0, 8)
           },
           {
-            title: '开局三件事',
-            body: '先登录、让它看懂仓库、再给一个明确目标。中文开发者最常见的正确姿势，是把任务写成“目标 + 约束 + 验收”。',
-            bullets: bullets(quickstart, 8)
+            theme: 'mcp',
+            title: '⚡ 常见工作流',
+            intro: '最值得高频复用的 Claude Code 使用方式。',
+            list: [
+              '理解新仓库：先总览，再定位模块，再问术语表',
+              ...sectionFromHeading(common, 'Get a quick codebase overview', 3),
+              ...sectionFromHeading(common, 'Fix bugs efficiently', 3),
+              ...sectionFromHeading(common, 'Refactor code', 2)
+            ].slice(0, 8)
           }
         ]
       },
       {
-        id: 'workflow',
-        name: '高频工作流',
-        intro: '把散落的文档信息，折叠成几个最常见工作面。',
-        cards: [
+        id: 'col-2',
+        sections: [
           {
-            title: '需求实现 / Bug 修复',
-            body: '适合从小任务切入：先让 Claude Code 理解相关文件，再要求它给计划、改代码、跑测试、解释变更。',
-            bullets: bullets(common, 8)
+            theme: 'slash',
+            title: '⚡ 提示词写法',
+            intro: 'Claude Code 吃“上下文完整、边界明确”的任务描述。',
+            list: [
+              '推荐结构：背景 / 目标 / 限制 / 输出 / 验收',
+              ...bullets(practices, 7)
+            ].slice(0, 8)
           },
           {
-            title: '提效原则',
-            body: '高质量提示词通常包含：背景、目标、限制、输出形式、是否允许执行命令。把“少问多做”和“不要越权”同时写清楚。',
-            bullets: bullets(practices, 8)
-          },
-          {
-            title: '记忆与权限',
-            body: 'Memory 适合放稳定规则；Permission modes 决定执行边界。团队场景里，越明确权限边界，越能减少来回确认。',
-            bullets: [...bullets(memory, 4), ...bullets(permission, 4)].slice(0, 8)
+            theme: 'memory',
+            title: '📁 Memory 与权限',
+            intro: '把稳定规则写入记忆，把执行边界交给权限模式。',
+            list: [
+              ...bullets(memory, 4),
+              ...bullets(permission, 4)
+            ].slice(0, 8)
           }
         ]
       },
       {
-        id: 'config',
-        name: '配置速记',
-        intro: '需要的时候查，不需要时不打扰。',
-        cards: [
+        id: 'col-3',
+        sections: [
           {
-            title: 'Settings / 配置项',
-            body: '常见关注点包括模型、默认行为、工具接入与环境偏好。站点里只保留中文开发者最常查的认知层摘要。',
-            bullets: bullets(settings, 8)
+            theme: 'workflows',
+            title: '🧠 配置速记',
+            intro: '只留中文开发者最常碰到的配置概念。',
+            list: bullets(settings, 8)
           },
           {
-            title: 'CLI / 命令参考',
-            body: 'CLI Reference 很长，本页不逐条照搬，而是把常见入口、命令心智和查阅路径压缩成速查片段。',
-            bullets: bullets(cliRef, 8)
+            theme: 'config',
+            title: '⚙️ CLI / Flags',
+            intro: '不是全量手册，而是常见入口心智。',
+            list: [
+              'claude：启动交互式会话',
+              'claude -p：非交互/脚本模式',
+              'claude --version：查看版本',
+              ...bullets(cli, 5)
+            ].slice(0, 8)
+          }
+        ]
+      },
+      {
+        id: 'col-4',
+        sections: [
+          {
+            theme: 'skills',
+            title: '🔧 开局清单',
+            intro: '第一次使用最容易忽略的动作。',
+            list: quickstartBullets.slice(0, 8)
+          },
+          {
+            theme: 'cli',
+            title: '🖥️ 最近更新',
+            intro: '来自官方 changelog 的最近版本片段。',
+            versions: pickVersionBlocks(changelog, 6).map((item) => ({
+              version: item.version,
+              bullets: bullets(item.body, 3)
+            }))
           }
         ]
       }
     ],
-    changelog: pickVersionBlocks(changelog, 12).map((item) => ({
-      version: item.version,
-      bullets: bullets(item.body, 5)
-    })).filter((item) => item.bullets.length),
-    sources: SOURCES.map((source) => ({ title: source.title, url: source.url })),
+    tables: [
+      {
+        theme: 'dense',
+        title: '中文开发者默认心智',
+        rows: makeTable([
+          ['起步入口', '先用 Terminal CLI，最稳、最全'],
+          ['任务写法', '目标 + 约束 + 验收'],
+          ['适合交给它', '读代码、改代码、跑命令、整理方案'],
+          ['不该模糊的点', '是否能执行命令、是否能改文件、输出格式'],
+          ['长期规则放哪', 'CLAUDE.md / Memory'],
+          ['周更来源', '官方 changelog + 官方公开文档']
+        ])
+      }
+    ],
     notes: [
-      '内容每周全量抓取并重建，不做差量 patch。',
-      '官方文档通过 r.jina.ai 做只读镜像提取，避免依赖浏览器自动化。',
-      'cc.storyfox.cz 仅作为信息架构参考，不直接镜像文案。'
-    ]
+      '本站不是官网翻译镜像，而是速查表形态的中文重写。',
+      '每周 workflow 会全量抓取公开页面并重建整个页面。',
+      'cc.storyfox.cz 仅参考布局与阅读风格，不直接复制原文。'
+    ],
+    sources: SOURCES.map((source) => ({ title: source.title, url: source.url }))
   };
 };
 
-const html = (data) => `<!doctype html>
+const renderList = (items) => `<ul class="dense-list">${items.map((item) => `<li>${item}</li>`).join('')}</ul>`;
+const esc = (s) => String(s ?? '');
+
+const html = (data) => `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${data.meta.title}</title>
-  <meta name="description" content="${data.meta.description}" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${esc(data.meta.title)}</title>
+  <meta name="description" content="${esc(data.meta.description)}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌨️</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <div class="shell">
-    <header class="hero">
+  <div class="page">
+    <header class="header">
       <div>
-        <p class="kicker">${data.hero.kicker}</p>
-        <h1>${data.hero.title}</h1>
-        <p class="summary">${data.hero.summary}</p>
+        <h1>${esc(data.header.title)}</h1>
+        <p class="subtitle">${esc(data.header.subtitle)}</p>
       </div>
-      <div class="meta-card">
-        <div><span>生成时间</span><strong>${new Date(data.meta.generatedAt).toLocaleString('zh-CN', { hour12: false })}</strong></div>
-        <div><span>数据源</span><strong>${data.meta.sourceCount} 个页面</strong></div>
-        <div><span>更新策略</span><strong>每周全量重建</strong></div>
+      <div class="header-meta">
+        <span class="version-info">官方文档驱动 · 默认中文</span>
+        <span class="last-updated">更新于 ${new Date(data.meta.generatedAt).toLocaleString('zh-CN', { hour12: false })}</span>
       </div>
     </header>
 
-    <nav class="toc">
-      ${data.sections.map((section) => `<a href="#${section.id}">${section.name}</a>`).join('')}
-      <a href="#changelog">最近更新</a>
-      <a href="#sources">数据来源</a>
-    </nav>
+    <section class="changelog-banner">
+      <div class="banner-title">📌 站点说明</div>
+      <div class="banner-copy">${esc(data.header.summary)}</div>
+    </section>
 
-    <main class="grid">
-      ${data.sections.map((section) => `
-        <section id="${section.id}" class="panel">
-          <div class="panel-head">
-            <h2>${section.name}</h2>
-            <p>${section.intro}</p>
-          </div>
-          <div class="card-grid">
-            ${section.cards.map((card) => `
-              <article class="card">
-                <h3>${card.title}</h3>
-                <p>${card.body}</p>
-                <ul>${card.bullets.map((bullet) => `<li>${bullet}</li>`).join('')}</ul>
-              </article>
-            `).join('')}
+    <main class="main-grid">
+      ${data.columns.map((column) => `
+        <div class="column">
+          ${column.sections.map((section) => `
+            <section class="section section-${section.theme}">
+              <div class="section-header">${esc(section.title)}</div>
+              <div class="section-body">
+                <p class="section-intro">${esc(section.intro)}</p>
+                ${section.list ? renderList(section.list) : ''}
+                ${section.versions ? `<div class="version-stack">${section.versions.map((v) => `<article class="version-item"><div class="version-name">v${esc(v.version)}</div>${renderList(v.bullets)}</article>`).join('')}</div>` : ''}
+              </div>
+            </section>
+          `).join('')}
+        </div>
+      `).join('')}
+    </main>
+
+    <section class="bottom-grid">
+      ${data.tables.map((table) => `
+        <section class="section section-dense bottom-card">
+          <div class="section-header">${esc(table.title)}</div>
+          <div class="section-body">
+            <div class="kv-table">
+              ${table.rows.map((row) => `<div class="kv-row"><div class="kv-key">${esc(row.key)}</div><div class="kv-value">${esc(row.value)}</div></div>`).join('')}
+            </div>
           </div>
         </section>
       `).join('')}
 
-      <section id="changelog" class="panel wide">
-        <div class="panel-head">
-          <h2>最近版本更新</h2>
-          <p>从官方 changelog 抓取后，压缩成中文开发者更关心的“版本号 + 关键点”。</p>
-        </div>
-        <div class="timeline">
-          ${data.changelog.map((item) => `
-            <article class="version-card">
-              <div class="version-badge">v${item.version}</div>
-              <ul>${item.bullets.map((bullet) => `<li>${bullet}</li>`).join('')}</ul>
-            </article>
-          `).join('')}
+      <section class="section section-cli bottom-card">
+        <div class="section-header">🔎 数据来源</div>
+        <div class="section-body">
+          ${renderList(data.sources.map((source) => `${source.title} → ${source.url}`))}
+          <div class="notes">${data.notes.map((n) => `<p>${esc(n)}</p>`).join('')}</div>
         </div>
       </section>
-
-      <section id="sources" class="panel wide footer-panel">
-        <div class="panel-head">
-          <h2>数据来源与说明</h2>
-          <p>站点只消费公开可访问页面；页面文案为中文重写与重组，不是直接镜像。</p>
-        </div>
-        <div class="notes">
-          ${data.notes.map((note) => `<p>${note}</p>`).join('')}
-        </div>
-        <ul class="source-list">
-          ${data.sources.map((source) => `<li><a href="${source.url}" target="_blank" rel="noreferrer">${source.title}</a></li>`).join('')}
-        </ul>
-      </section>
-    </main>
+    </section>
   </div>
-  <script>window.__SITE_DATA__ = ${JSON.stringify(data)};</script>
   <script src="./script.js"></script>
 </body>
 </html>`;

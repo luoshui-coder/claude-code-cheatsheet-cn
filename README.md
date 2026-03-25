@@ -1,18 +1,21 @@
-# Claude Code 中文速查站
+# Claude Code 命令速查表（中文）
 
-一个面向中文开发者的 Claude Code 单页速查网站：保留高密度 cheat sheet 的信息效率，但不做原站镜像，而是按中文用户的理解路径重组内容。
+一个面向中文开发者的 Claude Code 单页命令速查表网站。
+
+目标不是做普通导航页，而是复刻 `cc.storyfox.cz` 那种 **高密度、多分栏、速查表导向** 的阅读形态；内容则改为基于 Claude Code 官方公开文档与 changelog 的中文重写版。
 
 ## 在线地址
 
-- GitHub Pages：部署后可访问 `https://luoshui-coder.github.io/claude-code-cheatsheet-cn/`
+- GitHub Pages：`https://luoshui-coder.github.io/claude-code-cheatsheet-cn/`
 - 仓库：`https://github.com/luoshui-coder/claude-code-cheatsheet-cn`
 
 ## 设计目标
 
-1. 默认中文，不直接翻译或镜像 `cc.storyfox.cz`
-2. 把官方文档拆成“上手 / 工作流 / 配置 / 更新”四条主线
-3. 保留高密度速查风格，但视觉上更现代，移动端可读
-4. 用尽量轻的技术栈：纯静态 HTML/CSS/JS + 一个 Node 生成脚本
+1. 默认中文
+2. 形态上贴近速查表：多分栏、信息密集、查了就走
+3. 不简单镜像原站，但保留其信息架构风格
+4. 支持周更：每周自动重抓官方 changelog 和相关公开文档，全量重建页面
+5. 技术栈尽量轻：纯静态 HTML/CSS/JS + 一个 Node 生成脚本
 
 ## 数据来源
 
