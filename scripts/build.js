@@ -6,23 +6,13 @@ const publicDir = path.join(root, 'public');
 const dataDir = path.join(root, 'data');
 
 const SOURCES = [
-  { key: 'overview', title: '官方 Overview', pageTitle: 'Claude Code overview', url: 'https://code.claude.com/docs/en/overview' },
-  { key: 'quickstart', title: '官方 Quickstart', pageTitle: 'Quickstart', url: 'https://code.claude.com/docs/en/quickstart' },
-  { key: 'common-workflows', title: '官方 Common workflows', pageTitle: 'Common workflows', url: 'https://code.claude.com/docs/en/common-workflows' },
-  { key: 'best-practices', title: '官方 Best practices', pageTitle: 'Best practices', url: 'https://code.claude.com/docs/en/best-practices' },
-  { key: 'memory', title: '官方 Memory', pageTitle: 'Store instructions and memories', url: 'https://code.claude.com/docs/en/memory' },
-  { key: 'permission-modes', title: '官方 Permission modes', pageTitle: 'Permission modes', url: 'https://code.claude.com/docs/en/permission-modes' },
-  { key: 'settings', title: '官方 Settings', pageTitle: 'Settings', url: 'https://code.claude.com/docs/en/settings' },
-  { key: 'cli-reference', title: '官方 CLI reference', pageTitle: 'CLI reference', url: 'https://code.claude.com/docs/en/cli-reference' },
   { key: 'changelog', title: '官方 Changelog', pageTitle: 'Changelog', url: 'https://code.claude.com/docs/en/changelog' },
   { key: 'storyfox', title: '参考：cc.storyfox.cz', url: 'https://cc.storyfox.cz/' }
 ];
 
 const fetchMarkdown = async (url) => {
   const mirror = `https://r.jina.ai/http://${url}`;
-  const res = await fetch(mirror, {
-    headers: { 'User-Agent': 'Mozilla/5.0 Claude Code CN Builder' }
-  });
+  const res = await fetch(mirror, { headers: { 'User-Agent': 'Mozilla/5.0 Claude Code CN Builder' } });
   if (!res.ok) throw new Error(`${url} => ${res.status}`);
   return res.text();
 };
@@ -43,262 +33,359 @@ const focusMainContent = (md, pageTitle) => {
   return (copyPageIdx >= 0 ? fromTitle.slice(copyPageIdx + 'Copy page'.length) : fromTitle).trim();
 };
 
-const bullets = (text, limit = 8) => text
-  .split('\n')
-  .map((line) => line.trim())
-  .filter((line) => /^[-*]\s+/.test(line))
-  .map((line) => line.replace(/^[-*]\s+/, '').replace(/`/g, '').replace(/\[(.*?)\]\((.*?)\)/g, '$1').replace(/\s+/g, ' ').trim())
-  .filter((line) => line && !/^Copy page$/i.test(line) && line !== '* *')
-  .slice(0, limit);
-
-const sectionFromHeading = (md, heading, limit = 8) => {
-  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const re = new RegExp(`## .*?${escaped}[\\s\\S]*?(?=\\n## |$)`, 'i');
-  const hit = md.match(re);
-  return hit ? bullets(hit[0], limit) : [];
-};
-
-const firstCodeBlockItems = (md) => {
-  const blocks = [...md.matchAll(/```([\s\S]*?)```/g)].map((m) => m[1].trim());
-  return blocks.flatMap((block) => block.split('\n').map((x) => x.trim()).filter(Boolean));
-};
-
-const pickVersionBlocks = (md, limit = 10) => {
+const pickVersionBlocks = (md, limit = 6) => {
   const lines = md.split('\n');
   const blocks = [];
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].trim().match(/^(\d+\.\d+\.\d+)$/);
     if (!m) continue;
     const version = m[1];
+    const date = (lines[i + 2] || '').trim();
     let j = i + 1;
     const bucket = [];
     while (j < lines.length && !lines[j].trim().match(/^(\d+\.\d+\.\d+)$/)) {
-      if (/^\*\s+/.test(lines[j].trim())) bucket.push(lines[j].trim());
+      if (/^\*\s+/.test(lines[j].trim())) bucket.push(lines[j].trim().replace(/^\*\s+/, '').replace(/`/g, ''));
       j++;
     }
-    blocks.push({ version, body: bucket.join('\n').trim() });
+    blocks.push({ version, date, bullets: bucket.slice(0, 5) });
     if (blocks.length >= limit) break;
     i = j - 1;
   }
   return blocks;
 };
 
-const makeTable = (pairs) => pairs.map(([k, v]) => ({ key: k, value: v }));
+const zhRecent = [
+  '新增 --bare：用于脚本化 -p 调用的极简无头模式，不跑 hooks / LSP / 插件扫描',
+  '新增 --channels：权限请求可中继到手机端，部分 MCP 消息也可推送',
+  '新增 skills / slash commands 的 effort 前言字段',
+  '/fork 更名为 /branch（旧别名仍兼容）',
+  'SendMessage 现在可自动恢复已停止的 agent'
+];
 
-const buildData = (docs) => {
-  const overview = docs.overview;
-  const quickstart = docs.quickstart;
-  const common = docs['common-workflows'];
-  const practices = docs['best-practices'];
-  const memory = docs.memory;
-  const permission = docs['permission-modes'];
-  const settings = docs.settings;
-  const cli = docs['cli-reference'];
-  const changelog = docs.changelog;
-
-  const installSnippets = firstCodeBlockItems(overview).filter((x) => /claude|install|brew|winget|curl|irm/.test(x)).slice(0, 8);
-  const quickstartBullets = bullets(quickstart, 10);
-
-  return {
-    meta: {
-      title: 'Claude Code 命令速查表（中文）',
-      description: '高密度、多分栏、默认中文的 Claude Code 单页速查表，按周自动重建。',
-      generatedAt: new Date().toISOString()
-    },
-    header: {
-      title: 'Claude Code 命令速查表',
-      subtitle: '中文重写版 · 高密度速查 · 周更自动重建',
-      summary: '保留 cc.storyfox.cz 的速查表阅读形态：多分栏、卡片密集、查了就走；但内容来源改为官方文档与 changelog，文案按中文开发者习惯重组。'
-    },
-    columns: [
-      {
-        id: 'col-1',
-        sections: [
-          {
-            theme: 'keyboard',
-            title: '⌨️ 快速上手',
-            intro: '先安装，再进入项目，再开始会话。',
-            list: [
-              ...installSnippets.slice(0, 5),
-              '进入项目目录后运行：claude',
-              '首次使用先登录，再给目标 + 约束 + 验收'
-            ].slice(0, 8)
-          },
-          {
-            theme: 'mcp',
-            title: '⚡ 常见工作流',
-            intro: '最值得高频复用的 Claude Code 使用方式。',
-            list: [
-              '理解新仓库：先总览，再定位模块，再问术语表',
-              ...sectionFromHeading(common, 'Get a quick codebase overview', 3),
-              ...sectionFromHeading(common, 'Fix bugs efficiently', 3),
-              ...sectionFromHeading(common, 'Refactor code', 2)
-            ].slice(0, 8)
-          }
-        ]
-      },
-      {
-        id: 'col-2',
-        sections: [
-          {
-            theme: 'slash',
-            title: '⚡ 提示词写法',
-            intro: 'Claude Code 吃“上下文完整、边界明确”的任务描述。',
-            list: [
-              '推荐结构：背景 / 目标 / 限制 / 输出 / 验收',
-              ...bullets(practices, 7)
-            ].slice(0, 8)
-          },
-          {
-            theme: 'memory',
-            title: '📁 Memory 与权限',
-            intro: '把稳定规则写入记忆，把执行边界交给权限模式。',
-            list: [
-              ...bullets(memory, 4),
-              ...bullets(permission, 4)
-            ].slice(0, 8)
-          }
-        ]
-      },
-      {
-        id: 'col-3',
-        sections: [
-          {
-            theme: 'workflows',
-            title: '🧠 配置速记',
-            intro: '只留中文开发者最常碰到的配置概念。',
-            list: bullets(settings, 8)
-          },
-          {
-            theme: 'config',
-            title: '⚙️ CLI / Flags',
-            intro: '不是全量手册，而是常见入口心智。',
-            list: [
-              'claude：启动交互式会话',
-              'claude -p：非交互/脚本模式',
-              'claude --version：查看版本',
-              ...bullets(cli, 5)
-            ].slice(0, 8)
-          }
-        ]
-      },
-      {
-        id: 'col-4',
-        sections: [
-          {
-            theme: 'skills',
-            title: '🔧 开局清单',
-            intro: '第一次使用最容易忽略的动作。',
-            list: quickstartBullets.slice(0, 8)
-          },
-          {
-            theme: 'cli',
-            title: '🖥️ 最近更新',
-            intro: '来自官方 changelog 的最近版本片段。',
-            versions: pickVersionBlocks(changelog, 6).map((item) => ({
-              version: item.version,
-              bullets: bullets(item.body, 3)
-            }))
-          }
-        ]
-      }
-    ],
-    tables: [
-      {
-        theme: 'dense',
-        title: '中文开发者默认心智',
-        rows: makeTable([
-          ['起步入口', '先用 Terminal CLI，最稳、最全'],
-          ['任务写法', '目标 + 约束 + 验收'],
-          ['适合交给它', '读代码、改代码、跑命令、整理方案'],
-          ['不该模糊的点', '是否能执行命令、是否能改文件、输出格式'],
-          ['长期规则放哪', 'CLAUDE.md / Memory'],
-          ['周更来源', '官方 changelog + 官方公开文档']
-        ])
-      }
-    ],
-    notes: [
-      '本站不是官网翻译镜像，而是速查表形态的中文重写。',
-      '每周 workflow 会全量抓取公开页面并重建整个页面。',
-      'cc.storyfox.cz 仅参考布局与阅读风格，不直接复制原文。'
-    ],
-    sources: SOURCES.map((source) => ({ title: source.title, url: source.url }))
-  };
+const data = {
+  version: 'v2.1.81',
+  updated: new Date().toISOString(),
+  recentChanges: zhRecent,
+  changelogBlocks: [],
+  footerSources: [
+    '官方变更日志：https://code.claude.com/docs/en/changelog',
+    '参考结构：https://cc.storyfox.cz/'
+  ]
 };
 
-const renderList = (items) => `<ul class="dense-list">${items.map((item) => `<li>${item}</li>`).join('')}</ul>`;
-const esc = (s) => String(s ?? '');
-
-const html = (data) => `<!DOCTYPE html>
+const html = (ctx) => `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${esc(data.meta.title)}</title>
-  <meta name="description" content="${esc(data.meta.description)}">
+  <title>Claude Code 中文速查表</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌨️</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --keyboard-bg: #EFF6FF; --keyboard-header: #2563EB;
+      --slash-bg: #F5F3FF; --slash-header: #7C3AED;
+      --skills-bg: #ECFDF5; --skills-header: #059669;
+      --memory-bg: #FFFBEB; --memory-header: #D97706;
+      --config-bg: #FFF7ED; --config-header: #C2410C;
+      --workflows-bg: #FEF2F2; --workflows-header: #DC2626;
+      --mcp-bg: #ECFEFF; --mcp-header: #0891B2;
+      --cli-bg: #F9FAFB; --cli-header: #4B5563;
+      --footer-bg: #1F2937; --footer-text: #F9FAFB;
+      --font-sans: 'Inter', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    html { font-size: 12px; }
+    body { font-family: var(--font-sans); font-size: 0.9rem; line-height: 1.15; background: #fff; color: #1F2937; padding: 6mm; }
+    .page { width: 100%; max-width: 279mm; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2mm; padding-bottom: 1mm; border-bottom: 1px solid #E5E7EB; }
+    .header h1 { font-size: 1.4rem; font-weight: 700; color: #111827; }
+    .header-meta { font-size: 0.75rem; color: #6B7280; text-align: right; }
+    .header-meta .version-info { display: block; font-weight: 600; color: #374151; }
+    .header-meta .last-updated { display: block; font-size: 0.7rem; color: #9CA3AF; }
+    .changelog { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border: 1px solid #F59E0B; border-radius: 4px; padding: 1.5mm 3mm; margin-bottom: 2mm; font-size: 0.72rem; }
+    .changelog-header { font-weight: 700; color: #92400E; margin-bottom: 0.5mm; display: flex; align-items: center; gap: 1mm; }
+    .changelog-list { display: flex; flex-wrap: wrap; gap: 1mm 4mm; color: #78350F; list-style: none; }
+    .changelog-list li { display: flex; align-items: center; gap: 1mm; }
+    .changelog-list li::before { content: '•'; color: #F59E0B; font-weight: bold; }
+    .main-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2mm; align-items: stretch; }
+    .section { border-radius: 3px; overflow: hidden; display: flex; flex-direction: column; }
+    .section-keyboard-mcp > .section:last-child, .section-slash-memory > .section:last-child, .section-workflows-config > .section:last-child, .section-skills-cli > .section:last-child { flex: 1; }
+    .section-header { padding: 1.2mm 2mm; color: white; font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.03em; display: flex; align-items: center; gap: 1mm; }
+    .section-content { padding: 1.5mm 2.5mm; flex: 1; }
+    .sub-header { font-weight: 700; font-style: italic; font-size: 0.75rem; color: #374151; margin-top: 1.2mm; margin-bottom: 0.4mm; padding-bottom: 0.3mm; border-bottom: 1px dotted rgba(0,0,0,0.15); }
+    .sub-header:first-child { margin-top: 0; }
+    .row { display: flex; gap: 1.5mm; padding: 0.3mm 0; line-height: 1.2; }
+    .key { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 600; color: #1F2937; white-space: nowrap; flex-shrink: 0; }
+    .desc { font-size: 0.8rem; color: #4B5563; flex: 1; }
+    .keycap { display: inline-block; background: linear-gradient(180deg, #FAFAFA 0%, #E5E7EB 100%); border: 1px solid #D1D5DB; border-radius: 2px; padding: 0.2mm 1.2mm; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; color: #374151; box-shadow: 0 1px 1px rgba(0,0,0,0.1), inset 0 -1px 0 rgba(0,0,0,0.05); margin-right: 0.3mm; }
+    .badge-new { display: inline-block; background: #EF4444; color: white; font-size: 0.55rem; font-weight: 700; padding: 0.2mm 1mm; border-radius: 2px; margin-left: 1mm; vertical-align: middle; text-transform: uppercase; letter-spacing: 0.03em; }
+    .section-keyboard { background: var(--keyboard-bg); } .section-keyboard .section-header { background: var(--keyboard-header); }
+    .section-slash { background: var(--slash-bg); } .section-slash .section-header { background: var(--slash-header); }
+    .section-skills { background: var(--skills-bg); } .section-skills .section-header { background: var(--skills-header); }
+    .section-memory { background: var(--memory-bg); } .section-memory .section-header { background: var(--memory-header); }
+    .section-workflows { background: var(--workflows-bg); } .section-workflows .section-header { background: var(--workflows-header); }
+    .section-mcp { background: var(--mcp-bg); } .section-mcp .section-header { background: var(--mcp-header); }
+    .section-cli { background: var(--cli-bg); } .section-cli .section-header { background: var(--cli-header); }
+    .section-config { background: var(--config-bg); } .section-config .section-header { background: var(--config-header); }
+    .section-keyboard-mcp, .section-slash-memory, .section-workflows-config, .section-skills-cli { display: flex; flex-direction: column; gap: 2mm; }
+    .footer { margin-top: 2mm; background: var(--footer-bg); color: var(--footer-text); padding: 1.5mm 2.5mm; border-radius: 3px; font-size: 0.75rem; display: flex; flex-direction: column; gap: 0.7mm; }
+    .footer-row { display: flex; flex-wrap: wrap; gap: 2mm; align-items: center; }
+    .footer-label { font-weight: 700; color: #9CA3AF; margin-right: 1mm; }
+    .footer-item { display: inline-flex; align-items: center; gap: 1mm; }
+    .footer-item code { font-family: var(--font-mono); background: rgba(255,255,255,0.1); padding: 0.3mm 1mm; border-radius: 2px; }
+    .footer-sep { color: #6B7280; }
+    @media screen and (max-width: 1100px) { html { font-size: 10px; } .main-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media screen and (max-width: 600px) { html { font-size: 11px; } body { padding: 3mm; } .main-grid { grid-template-columns: 1fr; } .footer-row { flex-direction: column; align-items: flex-start; gap: 2px; } .changelog-list { flex-direction: column; gap: 1mm; } }
+  </style>
 </head>
 <body>
   <div class="page">
     <header class="header">
-      <div>
-        <h1>${esc(data.header.title)}</h1>
-        <p class="subtitle">${esc(data.header.subtitle)}</p>
-      </div>
+      <h1>Claude Code 中文速查表</h1>
       <div class="header-meta">
-        <span class="version-info">官方文档驱动 · 默认中文</span>
-        <span class="last-updated">更新于 ${new Date(data.meta.generatedAt).toLocaleString('zh-CN', { hour12: false })}</span>
+        <span class="version-info">Claude Code ${ctx.version}</span>
+        <span class="last-updated">最后更新：${new Date(ctx.updated).toLocaleString('zh-CN', { hour12: false })}</span>
       </div>
     </header>
 
-    <section class="changelog-banner">
-      <div class="banner-title">📌 站点说明</div>
-      <div class="banner-copy">${esc(data.header.summary)}</div>
-    </section>
+    <div class="changelog">
+      <div class="changelog-header">📋 最近更新（中文）</div>
+      <ul class="changelog-list">
+        ${ctx.recentChanges.map((x) => `<li>${x}</li>`).join('')}
+      </ul>
+    </div>
 
     <main class="main-grid">
-      ${data.columns.map((column) => `
-        <div class="column">
-          ${column.sections.map((section) => `
-            <section class="section section-${section.theme}">
-              <div class="section-header">${esc(section.title)}</div>
-              <div class="section-body">
-                <p class="section-intro">${esc(section.intro)}</p>
-                ${section.list ? renderList(section.list) : ''}
-                ${section.versions ? `<div class="version-stack">${section.versions.map((v) => `<article class="version-item"><div class="version-name">v${esc(v.version)}</div>${renderList(v.bullets)}</article>`).join('')}</div>` : ''}
-              </div>
-            </section>
-          `).join('')}
-        </div>
-      `).join('')}
-    </main>
-
-    <section class="bottom-grid">
-      ${data.tables.map((table) => `
-        <section class="section section-dense bottom-card">
-          <div class="section-header">${esc(table.title)}</div>
-          <div class="section-body">
-            <div class="kv-table">
-              ${table.rows.map((row) => `<div class="kv-row"><div class="kv-key">${esc(row.key)}</div><div class="kv-value">${esc(row.value)}</div></div>`).join('')}
-            </div>
+      <div class="section-keyboard-mcp">
+        <section class="section section-keyboard">
+          <div class="section-header">⌨️ 键盘快捷键</div>
+          <div class="section-content">
+            <div class="sub-header">通用控制</div>
+            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">C</span></span> <span class="desc">取消输入 / 中断生成</span></div>
+            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">D</span></span> <span class="desc">退出会话</span></div>
+            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">L</span></span> <span class="desc">清空屏幕</span></div>
+            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">O</span></span> <span class="desc">切换详细输出</span></div>
+            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">R</span></span> <span class="desc">反向搜索历史</span></div>
+            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">G</span></span> <span class="desc">在编辑器中打开当前输入</span></div>
+            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">B</span></span> <span class="desc">把当前任务转入后台</span></div>
+            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">T</span></span> <span class="desc">切换任务列表</span></div>
+            <div class="sub-header">模式切换</div>
+            <div class="row"><span class="key"><span class="keycap">Shift</span><span class="keycap">Tab</span></span> <span class="desc">轮换权限模式</span></div>
+            <div class="row"><span class="key"><span class="keycap">Alt</span><span class="keycap">P</span></span> <span class="desc">切换模型</span></div>
+            <div class="row"><span class="key"><span class="keycap">Alt</span><span class="keycap">T</span></span> <span class="desc">开关 thinking</span></div>
+            <div class="sub-header">输入前缀</div>
+            <div class="row"><span class="key">/</span> <span class="desc">Slash 命令</span></div>
+            <div class="row"><span class="key">!</span> <span class="desc">直接执行 bash</span></div>
+            <div class="row"><span class="key">@</span> <span class="desc">提及文件并自动补全</span></div>
           </div>
         </section>
-      `).join('')}
 
-      <section class="section section-cli bottom-card">
-        <div class="section-header">🔎 数据来源</div>
-        <div class="section-body">
-          ${renderList(data.sources.map((source) => `${source.title} → ${source.url}`))}
-          <div class="notes">${data.notes.map((n) => `<p>${esc(n)}</p>`).join('')}</div>
-        </div>
-      </section>
-    </section>
+        <section class="section section-mcp">
+          <div class="section-header">🔌 MCP 服务器</div>
+          <div class="section-content">
+            <div class="sub-header">添加方式</div>
+            <div class="row"><span class="key">--transport http</span> <span class="desc">远程 HTTP（推荐）</span></div>
+            <div class="row"><span class="key">--transport stdio</span> <span class="desc">本地进程</span></div>
+            <div class="row"><span class="key">--transport sse</span> <span class="desc">远程 SSE</span></div>
+            <div class="sub-header">作用域</div>
+            <div class="row"><span class="key">Local</span> <span class="desc">.claude.json，当前项目本地</span></div>
+            <div class="row"><span class="key">Project</span> <span class="desc">.mcp.json，项目共享</span></div>
+            <div class="row"><span class="key">User</span> <span class="desc">~/.claude.json，全局用户级</span></div>
+            <div class="sub-header">管理</div>
+            <div class="row"><span class="key">/mcp</span> <span class="desc">交互式管理界面</span></div>
+            <div class="row"><span class="key">claude mcp list</span> <span class="desc">列出全部 MCP</span></div>
+            <div class="row"><span class="key">claude mcp serve</span> <span class="desc">把 Claude Code 当 MCP server</span></div>
+            <div class="row"><span class="key">Elicitation</span> <span class="desc">任务中途向用户请求结构化输入<span class="badge-new">NEW</span></span></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="section-slash-memory">
+        <section class="section section-slash">
+          <div class="section-header">⚡ Slash 命令</div>
+          <div class="section-content">
+            <div class="sub-header">会话</div>
+            <div class="row"><span class="key">/clear</span> <span class="desc">清空当前对话</span></div>
+            <div class="row"><span class="key">/compact [focus]</span> <span class="desc">压缩上下文</span></div>
+            <div class="row"><span class="key">/resume</span> <span class="desc">恢复 / 切换会话</span></div>
+            <div class="row"><span class="key">/rename [name]</span> <span class="desc">给当前会话命名</span></div>
+            <div class="row"><span class="key">/branch [name]</span> <span class="desc">分叉会话（/fork 兼容）</span></div>
+            <div class="row"><span class="key">/cost</span> <span class="desc">查看 token / 成本</span></div>
+            <div class="row"><span class="key">/context</span> <span class="desc">可视化上下文占用</span></div>
+            <div class="row"><span class="key">/diff</span> <span class="desc">交互式查看 diff</span></div>
+            <div class="sub-header">配置</div>
+            <div class="row"><span class="key">/config</span> <span class="desc">打开设置</span></div>
+            <div class="row"><span class="key">/model [model]</span> <span class="desc">切换模型</span></div>
+            <div class="row"><span class="key">/permissions</span> <span class="desc">查看 / 修改权限</span></div>
+            <div class="row"><span class="key">/effort [level]</span> <span class="desc">设置努力等级 low/med/high/max<span class="badge-new">NEW</span></span></div>
+            <div class="row"><span class="key">/color [color]</span> <span class="desc">设置提示条颜色</span></div>
+            <div class="sub-header">工具</div>
+            <div class="row"><span class="key">/init</span> <span class="desc">生成 CLAUDE.md</span></div>
+            <div class="row"><span class="key">/memory</span> <span class="desc">编辑记忆文件</span></div>
+            <div class="row"><span class="key">/hooks</span> <span class="desc">管理 hooks</span></div>
+            <div class="row"><span class="key">/skills</span> <span class="desc">查看可用 skills</span></div>
+            <div class="row"><span class="key">/agents</span> <span class="desc">管理 agents</span></div>
+            <div class="sub-header">特殊</div>
+            <div class="row"><span class="key">/btw &lt;question&gt;</span> <span class="desc">侧问，不吃主上下文</span></div>
+            <div class="row"><span class="key">/plan [desc]</span> <span class="desc">进入计划模式</span></div>
+            <div class="row"><span class="key">/loop [interval]</span> <span class="desc">周期任务</span></div>
+            <div class="row"><span class="key">/voice</span> <span class="desc">语音模式</span></div>
+            <div class="row"><span class="key">/doctor</span> <span class="desc">诊断安装问题</span></div>
+            <div class="row"><span class="key">/rc</span> <span class="desc">远程控制 / 网页桥接<span class="badge-new">NEW</span></span></div>
+            <div class="row"><span class="key">/help</span> <span class="desc">查看帮助</span></div>
+          </div>
+        </section>
+
+        <section class="section section-memory">
+          <div class="section-header">📁 Memory 与文件</div>
+          <div class="section-content">
+            <div class="sub-header">CLAUDE.md 位置</div>
+            <div class="row"><span class="key">./CLAUDE.md</span> <span class="desc">项目级，共享给团队</span></div>
+            <div class="row"><span class="key">~/.claude/CLAUDE.md</span> <span class="desc">个人级，所有项目生效</span></div>
+            <div class="row"><span class="key">/etc/claude-code/</span> <span class="desc">组织托管级配置</span></div>
+            <div class="sub-header">规则与导入</div>
+            <div class="row"><span class="key">.claude/rules/*.md</span> <span class="desc">项目规则</span></div>
+            <div class="row"><span class="key">~/.claude/rules/*.md</span> <span class="desc">个人规则</span></div>
+            <div class="row"><span class="key">paths: frontmatter</span> <span class="desc">按路径匹配规则</span></div>
+            <div class="row"><span class="key">@path/to/file</span> <span class="desc">在 CLAUDE.md 中引入文件</span></div>
+            <div class="sub-header">自动记忆</div>
+            <div class="row"><span class="key">~/.claude/projects/&lt;proj&gt;/memory/</span></div>
+            <div class="row"><span class="desc">包含 MEMORY.md 和主题记忆文件，会被自动加载</span></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="section-workflows-config">
+        <section class="section section-workflows">
+          <div class="section-header">🧠 工作流与技巧</div>
+          <div class="section-content">
+            <div class="sub-header">计划模式</div>
+            <div class="row"><span class="key"><span class="keycap">Shift</span><span class="keycap">Tab</span></span> <span class="desc">普通 → 自动接受 → 计划模式</span></div>
+            <div class="row"><span class="key">--permission-mode plan</span> <span class="desc">启动即进入计划模式</span></div>
+            <div class="sub-header">Thinking 与 Effort</div>
+            <div class="row"><span class="key"><span class="keycap">Alt</span><span class="keycap">T</span></span> <span class="desc">开 / 关 thinking</span></div>
+            <div class="row"><span class="key">"ultrathink"</span> <span class="desc">当前轮次最大努力</span></div>
+            <div class="row"><span class="key">/effort</span> <span class="desc">low / med / high<span class="badge-new">NEW</span></span></div>
+            <div class="sub-header">Git Worktree</div>
+            <div class="row"><span class="key">--worktree name</span> <span class="desc">每个功能独立分支 / 工作树</span></div>
+            <div class="row"><span class="key">isolation: worktree</span> <span class="desc">Agent 在独立 worktree 中运行</span></div>
+            <div class="row"><span class="key">sparsePaths</span> <span class="desc">只 checkout 必需目录<span class="badge-new">NEW</span></span></div>
+            <div class="sub-header">上下文管理</div>
+            <div class="row"><span class="key">/context</span> <span class="desc">查看使用情况和优化建议</span></div>
+            <div class="row"><span class="key">/compact [focus]</span> <span class="desc">带焦点压缩上下文</span></div>
+            <div class="row"><span class="key">Auto-compact</span> <span class="desc">约 95% 容量自动压缩</span></div>
+            <div class="row"><span class="key">1M context</span> <span class="desc">Opus 4.6 在 Max/Team/Enterprise 可用</span></div>
+            <div class="row"><span class="key">CLAUDE.md</span> <span class="desc">压缩后仍保留</span></div>
+            <div class="sub-header">SDK / Headless</div>
+            <div class="row"><span class="key">claude -p "query"</span> <span class="desc">非交互运行</span></div>
+            <div class="row"><span class="key">--output-format json</span> <span class="desc">结构化输出</span></div>
+            <div class="row"><span class="key">--max-budget-usd 5</span> <span class="desc">设置成本上限</span></div>
+            <div class="row"><span class="key">cat file | claude -p</span> <span class="desc">管道输入</span></div>
+          </div>
+        </section>
+
+        <section class="section section-config">
+          <div class="section-header">⚙️ 配置与环境变量</div>
+          <div class="section-content">
+            <div class="sub-header">配置文件</div>
+            <div class="row"><span class="key">~/.claude/settings.json</span> <span class="desc">用户级设置</span></div>
+            <div class="row"><span class="key">.claude/settings.json</span> <span class="desc">项目共享设置</span></div>
+            <div class="row"><span class="key">.claude/settings.local.json</span> <span class="desc">仅本地生效</span></div>
+            <div class="row"><span class="key">~/.claude.json</span> <span class="desc">OAuth / MCP / 状态</span></div>
+            <div class="row"><span class="key">.mcp.json</span> <span class="desc">项目 MCP 配置</span></div>
+            <div class="sub-header">关键设置</div>
+            <div class="row"><span class="key">modelOverrides</span> <span class="desc">模型选择器映射到自定义模型 ID</span></div>
+            <div class="row"><span class="key">autoMemoryDirectory</span> <span class="desc">自定义自动记忆目录</span></div>
+            <div class="row"><span class="key">worktree.sparsePaths</span> <span class="desc">稀疏 checkout 目录<span class="badge-new">NEW</span></span></div>
+            <div class="sub-header">关键环境变量</div>
+            <div class="row"><span class="key">ANTHROPIC_API_KEY</span></div>
+            <div class="row"><span class="key">ANTHROPIC_MODEL</span></div>
+            <div class="row"><span class="key">CLAUDE_CODE_EFFORT_LEVEL</span> <span class="desc">low / med / high</span></div>
+            <div class="row"><span class="key">MAX_THINKING_TOKENS</span> <span class="desc">0 表示关闭</span></div>
+            <div class="row"><span class="key">ANTHROPIC_CUSTOM_MODEL_OPTION</span> <span class="desc">给 /model 增加自定义项</span></div>
+            <div class="row"><span class="key">CLAUDECODE</span> <span class="desc">检测是否运行在 Claude Code shell</span></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="section-skills-cli">
+        <section class="section section-skills">
+          <div class="section-header">🔧 Skills 与 Agents</div>
+          <div class="section-content">
+            <div class="sub-header">内置 Skills</div>
+            <div class="row"><span class="key">/simplify</span> <span class="desc">代码评审（3 个并行 agent）</span></div>
+            <div class="row"><span class="key">/batch</span> <span class="desc">大规模并行改动（5-30 worktrees）</span></div>
+            <div class="row"><span class="key">/debug [desc]</span> <span class="desc">从 debug log 排查问题</span></div>
+            <div class="row"><span class="key">/loop [interval]</span> <span class="desc">周期任务 skill</span></div>
+            <div class="row"><span class="key">/claude-api</span> <span class="desc">加载 API / SDK 参考</span></div>
+            <div class="sub-header">自定义 Skill 位置</div>
+            <div class="row"><span class="key">.claude/skills/&lt;name&gt;/</span> <span class="desc">项目技能</span></div>
+            <div class="row"><span class="key">~/.claude/skills/&lt;name&gt;/</span> <span class="desc">个人技能</span></div>
+            <div class="sub-header">Skill Frontmatter</div>
+            <div class="row"><span class="key">description</span> <span class="desc">自动触发描述</span></div>
+            <div class="row"><span class="key">allowed-tools</span> <span class="desc">跳过权限确认</span></div>
+            <div class="row"><span class="key">model</span> <span class="desc">指定 skill 使用模型</span></div>
+            <div class="row"><span class="key">effort</span> <span class="desc">覆盖默认 effort<span class="badge-new">NEW</span></span></div>
+            <div class="row"><span class="key">context: fork</span> <span class="desc">在子 agent 中运行</span></div>
+            <div class="sub-header">内置 Agents</div>
+            <div class="row"><span class="key">Explore</span> <span class="desc">快速只读探索（Haiku）</span></div>
+            <div class="row"><span class="key">Plan</span> <span class="desc">计划模式研究 agent</span></div>
+            <div class="row"><span class="key">General</span> <span class="desc">全工具复杂任务</span></div>
+            <div class="row"><span class="key">Bash</span> <span class="desc">独立终端上下文 agent</span></div>
+          </div>
+        </section>
+
+        <section class="section section-cli">
+          <div class="section-header">🖥️ CLI 与 Flags</div>
+          <div class="section-content">
+            <div class="sub-header">核心命令</div>
+            <div class="row"><span class="key">claude</span> <span class="desc">交互式模式</span></div>
+            <div class="row"><span class="key">claude "q"</span> <span class="desc">带 prompt 启动</span></div>
+            <div class="row"><span class="key">claude -p "q"</span> <span class="desc">无头模式</span></div>
+            <div class="row"><span class="key">claude -c</span> <span class="desc">续上次会话</span></div>
+            <div class="row"><span class="key">claude -r "n"</span> <span class="desc">按名字恢复</span></div>
+            <div class="row"><span class="key">claude update</span> <span class="desc">更新 Claude Code</span></div>
+            <div class="sub-header">关键参数</div>
+            <div class="row"><span class="key">--model</span> <span class="desc">指定模型</span></div>
+            <div class="row"><span class="key">-w</span> <span class="desc">Git worktree</span></div>
+            <div class="row"><span class="key">-n / --name</span> <span class="desc">会话命名</span></div>
+            <div class="row"><span class="key">--add-dir</span> <span class="desc">附加工作目录</span></div>
+            <div class="row"><span class="key">--agent</span> <span class="desc">使用指定 agent</span></div>
+            <div class="row"><span class="key">--allowedTools</span> <span class="desc">预批准工具</span></div>
+            <div class="row"><span class="key">--output-format</span> <span class="desc">json / stream</span></div>
+            <div class="row"><span class="key">--json-schema</span> <span class="desc">结构化输出</span></div>
+            <div class="row"><span class="key">--max-turns</span> <span class="desc">限制 agent 轮数</span></div>
+            <div class="row"><span class="key">--max-budget-usd</span> <span class="desc">成本上限</span></div>
+            <div class="row"><span class="key">--console</span> <span class="desc">使用 Anthropic Console 认证</span></div>
+            <div class="row"><span class="key">--bare</span> <span class="desc">极简无头模式<span class="badge-new">NEW</span></span></div>
+            <div class="row"><span class="key">--channels</span> <span class="desc">权限中继 / MCP 推送<span class="badge-new">NEW</span></span></div>
+            <div class="row"><span class="key">--permission-mode</span> <span class="desc">plan / default / ...</span></div>
+            <div class="row"><span class="key">--dangerously-skip-permissions</span> <span class="desc">跳过所有权限确认 ⚠️</span></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-row">
+        <span class="footer-label">权限模式：</span>
+        <span class="footer-item"><code>default</code> 按需询问</span>
+        <span class="footer-sep">·</span>
+        <span class="footer-item"><code>acceptEdits</code> 自动接受编辑</span>
+        <span class="footer-sep">·</span>
+        <span class="footer-item"><code>plan</code> 只读计划</span>
+        <span class="footer-sep">·</span>
+        <span class="footer-item"><code>dontAsk</code> 未允许即拒绝</span>
+        <span class="footer-sep">·</span>
+        <span class="footer-item"><code>bypassPermissions</code> 全跳过</span>
+      </div>
+      <div class="footer-row">
+        <span class="footer-label">数据来源：</span>
+        ${ctx.footerSources.map((s) => `<span class="footer-item">${s}</span>`).join('<span class="footer-sep">·</span>')}
+      </div>
+    </footer>
   </div>
-  <script src="./script.js"></script>
 </body>
 </html>`;
 
@@ -306,16 +393,10 @@ const run = async () => {
   await fs.mkdir(publicDir, { recursive: true });
   await fs.mkdir(dataDir, { recursive: true });
 
-  const docs = {};
-  for (const source of SOURCES) {
-    const raw = await fetchMarkdown(source.url);
-    const cleaned = stripBoilerplate(raw);
-    const focused = source.key === 'storyfox' ? cleaned : focusMainContent(cleaned, source.pageTitle);
-    docs[source.key] = focused;
-    await fs.writeFile(path.join(dataDir, `${source.key}.md`), focused);
-  }
-
-  const data = buildData(docs);
+  const changelogRaw = await fetchMarkdown('https://code.claude.com/docs/en/changelog');
+  const changelog = focusMainContent(stripBoilerplate(changelogRaw), 'Changelog');
+  await fs.writeFile(path.join(dataDir, 'changelog.md'), changelog);
+  data.changelogBlocks = pickVersionBlocks(changelog, 6);
   await fs.writeFile(path.join(publicDir, 'site-data.json'), JSON.stringify(data, null, 2));
   await fs.writeFile(path.join(publicDir, 'index.html'), html(data));
 };
