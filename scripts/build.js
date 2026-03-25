@@ -5,11 +5,6 @@ const root = process.cwd();
 const publicDir = path.join(root, 'public');
 const dataDir = path.join(root, 'data');
 
-const SOURCES = [
-  { key: 'changelog', title: '官方 Changelog', pageTitle: 'Changelog', url: 'https://code.claude.com/docs/en/changelog' },
-  { key: 'storyfox', title: '参考：cc.storyfox.cz', url: 'https://cc.storyfox.cz/' }
-];
-
 const fetchMarkdown = async (url) => {
   const mirror = `https://r.jina.ai/http://${url}`;
   const res = await fetch(mirror, { headers: { 'User-Agent': 'Mozilla/5.0 Claude Code CN Builder' } });
@@ -33,27 +28,6 @@ const focusMainContent = (md, pageTitle) => {
   return (copyPageIdx >= 0 ? fromTitle.slice(copyPageIdx + 'Copy page'.length) : fromTitle).trim();
 };
 
-const pickVersionBlocks = (md, limit = 6) => {
-  const lines = md.split('\n');
-  const blocks = [];
-  for (let i = 0; i < lines.length; i++) {
-    const m = lines[i].trim().match(/^(\d+\.\d+\.\d+)$/);
-    if (!m) continue;
-    const version = m[1];
-    const date = (lines[i + 2] || '').trim();
-    let j = i + 1;
-    const bucket = [];
-    while (j < lines.length && !lines[j].trim().match(/^(\d+\.\d+\.\d+)$/)) {
-      if (/^\*\s+/.test(lines[j].trim())) bucket.push(lines[j].trim().replace(/^\*\s+/, '').replace(/`/g, ''));
-      j++;
-    }
-    blocks.push({ version, date, bullets: bucket.slice(0, 5) });
-    if (blocks.length >= limit) break;
-    i = j - 1;
-  }
-  return blocks;
-};
-
 const zhRecent = [
   '新增 --bare：用于脚本化 -p 调用的极简无头模式，不跑 hooks / LSP / 插件扫描',
   '新增 --channels：权限请求可中继到手机端，部分 MCP 消息也可推送',
@@ -66,12 +40,15 @@ const data = {
   version: 'v2.1.81',
   updated: new Date().toISOString(),
   recentChanges: zhRecent,
-  changelogBlocks: [],
   footerSources: [
     '官方变更日志：https://code.claude.com/docs/en/changelog',
     '参考结构：https://cc.storyfox.cz/'
   ]
 };
+
+const row = (keyHtml, descHtml, os = 'both') => `<div class="row" data-os="${os}"><span class="key">${keyHtml}</span> <span class="desc">${descHtml}</span></div>`;
+const keycap = (text) => `<span class="keycap">${text}</span>`;
+const duo = (mac, win) => `<span class="os-mac">${mac}</span><span class="os-win">${win}</span>`;
 
 const html = (ctx) => `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -100,9 +77,14 @@ const html = (ctx) => `<!DOCTYPE html>
     .page { width: 100%; max-width: 279mm; margin: 0 auto; }
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2mm; padding-bottom: 1mm; border-bottom: 1px solid #E5E7EB; }
     .header h1 { font-size: 1.4rem; font-weight: 700; color: #111827; }
+    .header-right { display: flex; align-items: center; gap: 3mm; }
     .header-meta { font-size: 0.75rem; color: #6B7280; text-align: right; }
     .header-meta .version-info { display: block; font-weight: 600; color: #374151; }
     .header-meta .last-updated { display: block; font-size: 0.7rem; color: #9CA3AF; }
+    .os-toggle { display: flex; border: 1px solid #9CA3AF; border-radius: 5px; overflow: hidden; background: #F3F4F6; }
+    .os-btn { background: #fff; border: none; padding: 3px 8px; font-size: 0.8rem; cursor: pointer; line-height: 1; color: #6B7280; transition: background .15s, color .15s; display: flex; align-items: center; justify-content: center; }
+    .os-btn + .os-btn { border-left: 1px solid #9CA3AF; }
+    .os-btn.active { background: #111827; color: #fff; }
     .changelog { background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); border: 1px solid #F59E0B; border-radius: 4px; padding: 1.5mm 3mm; margin-bottom: 2mm; font-size: 0.72rem; }
     .changelog-header { font-weight: 700; color: #92400E; margin-bottom: 0.5mm; display: flex; align-items: center; gap: 1mm; }
     .changelog-list { display: flex; flex-wrap: wrap; gap: 1mm 4mm; color: #78350F; list-style: none; }
@@ -135,25 +117,37 @@ const html = (ctx) => `<!DOCTYPE html>
     .footer-item { display: inline-flex; align-items: center; gap: 1mm; }
     .footer-item code { font-family: var(--font-mono); background: rgba(255,255,255,0.1); padding: 0.3mm 1mm; border-radius: 2px; }
     .footer-sep { color: #6B7280; }
+    .os-win { display: none; }
+    body[data-os='win'] .os-win { display: inline; }
+    body[data-os='win'] .os-mac { display: none; }
+    body[data-os='mac'] .os-win { display: none; }
+    body[data-os='mac'] .os-mac { display: inline; }
+    .row[data-os='mac'] .os-win, .row[data-os='win'] .os-mac { display: none !important; }
+    body[data-os='mac'] .row[data-os='win'] { display: none; }
+    body[data-os='win'] .row[data-os='mac'] { display: none; }
     @media screen and (max-width: 1100px) { html { font-size: 10px; } .main-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media screen and (max-width: 600px) { html { font-size: 11px; } body { padding: 3mm; } .main-grid { grid-template-columns: 1fr; } .footer-row { flex-direction: column; align-items: flex-start; gap: 2px; } .changelog-list { flex-direction: column; gap: 1mm; } }
+    @media screen and (max-width: 600px) { html { font-size: 11px; } body { padding: 3mm; } .header { flex-wrap: wrap; gap: 4px; justify-content: space-between; } .main-grid { grid-template-columns: 1fr; } .footer-row { flex-direction: column; align-items: flex-start; gap: 2px; } .changelog-list { flex-direction: column; gap: 1mm; } }
   </style>
 </head>
-<body>
+<body data-os="mac">
   <div class="page">
     <header class="header">
       <h1>Claude Code 中文速查表</h1>
-      <div class="header-meta">
-        <span class="version-info">Claude Code ${ctx.version}</span>
-        <span class="last-updated">最后更新：${new Date(ctx.updated).toLocaleString('zh-CN', { hour12: false })}</span>
+      <div class="header-right">
+        <div class="os-toggle" id="osToggle">
+          <button class="os-btn active" data-os="mac" title="Mac">Mac</button>
+          <button class="os-btn" data-os="win" title="Windows">Win</button>
+        </div>
+        <div class="header-meta">
+          <span class="version-info">Claude Code ${ctx.version}</span>
+          <span class="last-updated">最后更新：${new Date(ctx.updated).toLocaleString('zh-CN', { hour12: false })}</span>
+        </div>
       </div>
     </header>
 
     <div class="changelog">
       <div class="changelog-header">📋 最近更新（中文）</div>
-      <ul class="changelog-list">
-        ${ctx.recentChanges.map((x) => `<li>${x}</li>`).join('')}
-      </ul>
+      <ul class="changelog-list">${ctx.recentChanges.map((x) => `<li>${x}</li>`).join('')}</ul>
     </div>
 
     <main class="main-grid">
@@ -162,22 +156,22 @@ const html = (ctx) => `<!DOCTYPE html>
           <div class="section-header">⌨️ 键盘快捷键</div>
           <div class="section-content">
             <div class="sub-header">通用控制</div>
-            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">C</span></span> <span class="desc">取消输入 / 中断生成</span></div>
-            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">D</span></span> <span class="desc">退出会话</span></div>
-            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">L</span></span> <span class="desc">清空屏幕</span></div>
-            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">O</span></span> <span class="desc">切换详细输出</span></div>
-            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">R</span></span> <span class="desc">反向搜索历史</span></div>
-            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">G</span></span> <span class="desc">在编辑器中打开当前输入</span></div>
-            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">B</span></span> <span class="desc">把当前任务转入后台</span></div>
-            <div class="row"><span class="key"><span class="keycap">Ctrl</span><span class="keycap">T</span></span> <span class="desc">切换任务列表</span></div>
+            ${row(duo(`${keycap('Ctrl')}${keycap('C')}`, `${keycap('Ctrl')}${keycap('C')}`), '取消输入 / 中断生成')}
+            ${row(duo(`${keycap('Ctrl')}${keycap('D')}`, `${keycap('Ctrl')}${keycap('D')}`), '退出会话')}
+            ${row(duo(`${keycap('Ctrl')}${keycap('L')}`, `${keycap('Ctrl')}${keycap('L')}`), '清空屏幕')}
+            ${row(duo(`${keycap('Ctrl')}${keycap('O')}`, `${keycap('Ctrl')}${keycap('O')}`), '切换详细输出')}
+            ${row(duo(`${keycap('Ctrl')}${keycap('R')}`, `${keycap('Ctrl')}${keycap('R')}`), '反向搜索历史')}
+            ${row(duo(`${keycap('Ctrl')}${keycap('G')}`, `${keycap('Ctrl')}${keycap('G')}`), '在编辑器中打开当前输入')}
+            ${row(duo(`${keycap('Ctrl')}${keycap('B')}`, `${keycap('Ctrl')}${keycap('B')}`), '把当前任务转入后台')}
+            ${row(duo(`${keycap('Ctrl')}${keycap('T')}`, `${keycap('Ctrl')}${keycap('T')}`), '切换任务列表')}
             <div class="sub-header">模式切换</div>
-            <div class="row"><span class="key"><span class="keycap">Shift</span><span class="keycap">Tab</span></span> <span class="desc">轮换权限模式</span></div>
-            <div class="row"><span class="key"><span class="keycap">Alt</span><span class="keycap">P</span></span> <span class="desc">切换模型</span></div>
-            <div class="row"><span class="key"><span class="keycap">Alt</span><span class="keycap">T</span></span> <span class="desc">开关 thinking</span></div>
+            ${row(duo(`${keycap('Shift')}${keycap('Tab')}`, `${keycap('Shift')}${keycap('Tab')}`), '轮换权限模式')}
+            ${row(duo(`${keycap('Alt')}${keycap('P')}`, `${keycap('Alt')}${keycap('P')}`), '切换模型')}
+            ${row(duo(`${keycap('Alt')}${keycap('T')}`, `${keycap('Alt')}${keycap('T')}`), '开 / 关 thinking')}
             <div class="sub-header">输入前缀</div>
-            <div class="row"><span class="key">/</span> <span class="desc">Slash 命令</span></div>
-            <div class="row"><span class="key">!</span> <span class="desc">直接执行 bash</span></div>
-            <div class="row"><span class="key">@</span> <span class="desc">提及文件并自动补全</span></div>
+            ${row('/', 'Slash 命令')}
+            ${row('!', '直接执行 bash')}
+            ${row('@', '提及文件并自动补全')}
           </div>
         </section>
 
@@ -185,18 +179,18 @@ const html = (ctx) => `<!DOCTYPE html>
           <div class="section-header">🔌 MCP 服务器</div>
           <div class="section-content">
             <div class="sub-header">添加方式</div>
-            <div class="row"><span class="key">--transport http</span> <span class="desc">远程 HTTP（推荐）</span></div>
-            <div class="row"><span class="key">--transport stdio</span> <span class="desc">本地进程</span></div>
-            <div class="row"><span class="key">--transport sse</span> <span class="desc">远程 SSE</span></div>
+            ${row('--transport http', '远程 HTTP（推荐）')}
+            ${row('--transport stdio', '本地进程')}
+            ${row('--transport sse', '远程 SSE')}
             <div class="sub-header">作用域</div>
-            <div class="row"><span class="key">Local</span> <span class="desc">.claude.json，当前项目本地</span></div>
-            <div class="row"><span class="key">Project</span> <span class="desc">.mcp.json，项目共享</span></div>
-            <div class="row"><span class="key">User</span> <span class="desc">~/.claude.json，全局用户级</span></div>
+            ${row('Local', '.claude.json，当前项目本地')}
+            ${row('Project', '.mcp.json，项目共享')}
+            ${row('User', '~/.claude.json，全局用户级')}
             <div class="sub-header">管理</div>
-            <div class="row"><span class="key">/mcp</span> <span class="desc">交互式管理界面</span></div>
-            <div class="row"><span class="key">claude mcp list</span> <span class="desc">列出全部 MCP</span></div>
-            <div class="row"><span class="key">claude mcp serve</span> <span class="desc">把 Claude Code 当 MCP server</span></div>
-            <div class="row"><span class="key">Elicitation</span> <span class="desc">任务中途向用户请求结构化输入<span class="badge-new">NEW</span></span></div>
+            ${row('/mcp', '交互式管理界面')}
+            ${row('claude mcp list', '列出全部 MCP')}
+            ${row('claude mcp serve', '把 Claude Code 当 MCP server')}
+            ${row('Elicitation', '任务中途向用户请求结构化输入<span class="badge-new">NEW</span>')}
           </div>
         </section>
       </div>
@@ -206,34 +200,34 @@ const html = (ctx) => `<!DOCTYPE html>
           <div class="section-header">⚡ Slash 命令</div>
           <div class="section-content">
             <div class="sub-header">会话</div>
-            <div class="row"><span class="key">/clear</span> <span class="desc">清空当前对话</span></div>
-            <div class="row"><span class="key">/compact [focus]</span> <span class="desc">压缩上下文</span></div>
-            <div class="row"><span class="key">/resume</span> <span class="desc">恢复 / 切换会话</span></div>
-            <div class="row"><span class="key">/rename [name]</span> <span class="desc">给当前会话命名</span></div>
-            <div class="row"><span class="key">/branch [name]</span> <span class="desc">分叉会话（/fork 兼容）</span></div>
-            <div class="row"><span class="key">/cost</span> <span class="desc">查看 token / 成本</span></div>
-            <div class="row"><span class="key">/context</span> <span class="desc">可视化上下文占用</span></div>
-            <div class="row"><span class="key">/diff</span> <span class="desc">交互式查看 diff</span></div>
+            ${row('/clear', '清空当前对话')}
+            ${row('/compact [focus]', '压缩上下文')}
+            ${row('/resume', '恢复 / 切换会话')}
+            ${row('/rename [name]', '给当前会话命名')}
+            ${row('/branch [name]', '分叉会话（/fork 兼容）')}
+            ${row('/cost', '查看 token / 成本')}
+            ${row('/context', '可视化上下文占用')}
+            ${row('/diff', '交互式查看 diff')}
             <div class="sub-header">配置</div>
-            <div class="row"><span class="key">/config</span> <span class="desc">打开设置</span></div>
-            <div class="row"><span class="key">/model [model]</span> <span class="desc">切换模型</span></div>
-            <div class="row"><span class="key">/permissions</span> <span class="desc">查看 / 修改权限</span></div>
-            <div class="row"><span class="key">/effort [level]</span> <span class="desc">设置努力等级 low/med/high/max<span class="badge-new">NEW</span></span></div>
-            <div class="row"><span class="key">/color [color]</span> <span class="desc">设置提示条颜色</span></div>
+            ${row('/config', '打开设置')}
+            ${row('/model [model]', '切换模型')}
+            ${row('/permissions', '查看 / 修改权限')}
+            ${row('/effort [level]', '设置努力等级 low/med/high/max<span class="badge-new">NEW</span>')}
+            ${row('/color [color]', '设置提示条颜色')}
             <div class="sub-header">工具</div>
-            <div class="row"><span class="key">/init</span> <span class="desc">生成 CLAUDE.md</span></div>
-            <div class="row"><span class="key">/memory</span> <span class="desc">编辑记忆文件</span></div>
-            <div class="row"><span class="key">/hooks</span> <span class="desc">管理 hooks</span></div>
-            <div class="row"><span class="key">/skills</span> <span class="desc">查看可用 skills</span></div>
-            <div class="row"><span class="key">/agents</span> <span class="desc">管理 agents</span></div>
+            ${row('/init', '生成 CLAUDE.md')}
+            ${row('/memory', '编辑记忆文件')}
+            ${row('/hooks', '管理 hooks')}
+            ${row('/skills', '查看可用 skills')}
+            ${row('/agents', '管理 agents')}
             <div class="sub-header">特殊</div>
-            <div class="row"><span class="key">/btw &lt;question&gt;</span> <span class="desc">侧问，不吃主上下文</span></div>
-            <div class="row"><span class="key">/plan [desc]</span> <span class="desc">进入计划模式</span></div>
-            <div class="row"><span class="key">/loop [interval]</span> <span class="desc">周期任务</span></div>
-            <div class="row"><span class="key">/voice</span> <span class="desc">语音模式</span></div>
-            <div class="row"><span class="key">/doctor</span> <span class="desc">诊断安装问题</span></div>
-            <div class="row"><span class="key">/rc</span> <span class="desc">远程控制 / 网页桥接<span class="badge-new">NEW</span></span></div>
-            <div class="row"><span class="key">/help</span> <span class="desc">查看帮助</span></div>
+            ${row('/btw <question>', '侧问，不吃主上下文')}
+            ${row('/plan [desc]', '进入计划模式')}
+            ${row('/loop [interval]', '周期任务')}
+            ${row('/voice', '语音模式')}
+            ${row('/doctor', '诊断安装问题')}
+            ${row('/rc', '远程控制 / 网页桥接<span class="badge-new">NEW</span>')}
+            ${row('/help', '查看帮助')}
           </div>
         </section>
 
@@ -241,17 +235,17 @@ const html = (ctx) => `<!DOCTYPE html>
           <div class="section-header">📁 Memory 与文件</div>
           <div class="section-content">
             <div class="sub-header">CLAUDE.md 位置</div>
-            <div class="row"><span class="key">./CLAUDE.md</span> <span class="desc">项目级，共享给团队</span></div>
-            <div class="row"><span class="key">~/.claude/CLAUDE.md</span> <span class="desc">个人级，所有项目生效</span></div>
-            <div class="row"><span class="key">/etc/claude-code/</span> <span class="desc">组织托管级配置</span></div>
+            ${row('./CLAUDE.md', '项目级，共享给团队')}
+            ${row('~/.claude/CLAUDE.md', '个人级，所有项目生效')}
+            ${row('/etc/claude-code/', '组织托管级配置')}
             <div class="sub-header">规则与导入</div>
-            <div class="row"><span class="key">.claude/rules/*.md</span> <span class="desc">项目规则</span></div>
-            <div class="row"><span class="key">~/.claude/rules/*.md</span> <span class="desc">个人规则</span></div>
-            <div class="row"><span class="key">paths: frontmatter</span> <span class="desc">按路径匹配规则</span></div>
-            <div class="row"><span class="key">@path/to/file</span> <span class="desc">在 CLAUDE.md 中引入文件</span></div>
+            ${row('.claude/rules/*.md', '项目规则')}
+            ${row('~/.claude/rules/*.md', '个人规则')}
+            ${row('paths: frontmatter', '按路径匹配规则')}
+            ${row('@path/to/file', '在 CLAUDE.md 中引入文件')}
             <div class="sub-header">自动记忆</div>
-            <div class="row"><span class="key">~/.claude/projects/&lt;proj&gt;/memory/</span></div>
-            <div class="row"><span class="desc">包含 MEMORY.md 和主题记忆文件，会被自动加载</span></div>
+            ${row('~/.claude/projects/<proj>/memory/', '')}
+            ${row('', '包含 MEMORY.md 和主题记忆文件，会被自动加载')}
           </div>
         </section>
       </div>
@@ -261,27 +255,27 @@ const html = (ctx) => `<!DOCTYPE html>
           <div class="section-header">🧠 工作流与技巧</div>
           <div class="section-content">
             <div class="sub-header">计划模式</div>
-            <div class="row"><span class="key"><span class="keycap">Shift</span><span class="keycap">Tab</span></span> <span class="desc">普通 → 自动接受 → 计划模式</span></div>
-            <div class="row"><span class="key">--permission-mode plan</span> <span class="desc">启动即进入计划模式</span></div>
+            ${row(duo(`${keycap('Shift')}${keycap('Tab')}`, `${keycap('Shift')}${keycap('Tab')}`), '普通 → 自动接受 → 计划模式')}
+            ${row('--permission-mode plan', '启动即进入计划模式')}
             <div class="sub-header">Thinking 与 Effort</div>
-            <div class="row"><span class="key"><span class="keycap">Alt</span><span class="keycap">T</span></span> <span class="desc">开 / 关 thinking</span></div>
-            <div class="row"><span class="key">"ultrathink"</span> <span class="desc">当前轮次最大努力</span></div>
-            <div class="row"><span class="key">/effort</span> <span class="desc">low / med / high<span class="badge-new">NEW</span></span></div>
+            ${row(duo(`${keycap('Alt')}${keycap('T')}`, `${keycap('Alt')}${keycap('T')}`), '开 / 关 thinking')}
+            ${row('"ultrathink"', '当前轮次最大努力')}
+            ${row('/effort', 'low / med / high<span class="badge-new">NEW</span>')}
             <div class="sub-header">Git Worktree</div>
-            <div class="row"><span class="key">--worktree name</span> <span class="desc">每个功能独立分支 / 工作树</span></div>
-            <div class="row"><span class="key">isolation: worktree</span> <span class="desc">Agent 在独立 worktree 中运行</span></div>
-            <div class="row"><span class="key">sparsePaths</span> <span class="desc">只 checkout 必需目录<span class="badge-new">NEW</span></span></div>
+            ${row('--worktree name', '每个功能独立分支 / 工作树')}
+            ${row('isolation: worktree', 'Agent 在独立 worktree 中运行')}
+            ${row('sparsePaths', '只 checkout 必需目录<span class="badge-new">NEW</span>')}
             <div class="sub-header">上下文管理</div>
-            <div class="row"><span class="key">/context</span> <span class="desc">查看使用情况和优化建议</span></div>
-            <div class="row"><span class="key">/compact [focus]</span> <span class="desc">带焦点压缩上下文</span></div>
-            <div class="row"><span class="key">Auto-compact</span> <span class="desc">约 95% 容量自动压缩</span></div>
-            <div class="row"><span class="key">1M context</span> <span class="desc">Opus 4.6 在 Max/Team/Enterprise 可用</span></div>
-            <div class="row"><span class="key">CLAUDE.md</span> <span class="desc">压缩后仍保留</span></div>
+            ${row('/context', '查看使用情况和优化建议')}
+            ${row('/compact [focus]', '带焦点压缩上下文')}
+            ${row('Auto-compact', '约 95% 容量自动压缩')}
+            ${row('1M context', 'Opus 4.6 在 Max/Team/Enterprise 可用')}
+            ${row('CLAUDE.md', '压缩后仍保留')}
             <div class="sub-header">SDK / Headless</div>
-            <div class="row"><span class="key">claude -p "query"</span> <span class="desc">非交互运行</span></div>
-            <div class="row"><span class="key">--output-format json</span> <span class="desc">结构化输出</span></div>
-            <div class="row"><span class="key">--max-budget-usd 5</span> <span class="desc">设置成本上限</span></div>
-            <div class="row"><span class="key">cat file | claude -p</span> <span class="desc">管道输入</span></div>
+            ${row('claude -p "query"', '非交互运行')}
+            ${row('--output-format json', '结构化输出')}
+            ${row('--max-budget-usd 5', '设置成本上限')}
+            ${row('cat file | claude -p', '管道输入')}
           </div>
         </section>
 
@@ -289,22 +283,22 @@ const html = (ctx) => `<!DOCTYPE html>
           <div class="section-header">⚙️ 配置与环境变量</div>
           <div class="section-content">
             <div class="sub-header">配置文件</div>
-            <div class="row"><span class="key">~/.claude/settings.json</span> <span class="desc">用户级设置</span></div>
-            <div class="row"><span class="key">.claude/settings.json</span> <span class="desc">项目共享设置</span></div>
-            <div class="row"><span class="key">.claude/settings.local.json</span> <span class="desc">仅本地生效</span></div>
-            <div class="row"><span class="key">~/.claude.json</span> <span class="desc">OAuth / MCP / 状态</span></div>
-            <div class="row"><span class="key">.mcp.json</span> <span class="desc">项目 MCP 配置</span></div>
+            ${row('~/.claude/settings.json', '用户级设置')}
+            ${row('.claude/settings.json', '项目共享设置')}
+            ${row('.claude/settings.local.json', '仅本地生效')}
+            ${row('~/.claude.json', 'OAuth / MCP / 状态')}
+            ${row('.mcp.json', '项目 MCP 配置')}
             <div class="sub-header">关键设置</div>
-            <div class="row"><span class="key">modelOverrides</span> <span class="desc">模型选择器映射到自定义模型 ID</span></div>
-            <div class="row"><span class="key">autoMemoryDirectory</span> <span class="desc">自定义自动记忆目录</span></div>
-            <div class="row"><span class="key">worktree.sparsePaths</span> <span class="desc">稀疏 checkout 目录<span class="badge-new">NEW</span></span></div>
+            ${row('modelOverrides', '模型选择器映射到自定义模型 ID')}
+            ${row('autoMemoryDirectory', '自定义自动记忆目录')}
+            ${row('worktree.sparsePaths', '稀疏 checkout 目录<span class="badge-new">NEW</span>')}
             <div class="sub-header">关键环境变量</div>
-            <div class="row"><span class="key">ANTHROPIC_API_KEY</span></div>
-            <div class="row"><span class="key">ANTHROPIC_MODEL</span></div>
-            <div class="row"><span class="key">CLAUDE_CODE_EFFORT_LEVEL</span> <span class="desc">low / med / high</span></div>
-            <div class="row"><span class="key">MAX_THINKING_TOKENS</span> <span class="desc">0 表示关闭</span></div>
-            <div class="row"><span class="key">ANTHROPIC_CUSTOM_MODEL_OPTION</span> <span class="desc">给 /model 增加自定义项</span></div>
-            <div class="row"><span class="key">CLAUDECODE</span> <span class="desc">检测是否运行在 Claude Code shell</span></div>
+            ${row('ANTHROPIC_API_KEY', '')}
+            ${row('ANTHROPIC_MODEL', '')}
+            ${row('CLAUDE_CODE_EFFORT_LEVEL', 'low / med / high')}
+            ${row('MAX_THINKING_TOKENS', '0 表示关闭')}
+            ${row('ANTHROPIC_CUSTOM_MODEL_OPTION', '给 /model 增加自定义项')}
+            ${row('CLAUDECODE', '检测是否运行在 Claude Code shell')}
           </div>
         </section>
       </div>
@@ -314,25 +308,25 @@ const html = (ctx) => `<!DOCTYPE html>
           <div class="section-header">🔧 Skills 与 Agents</div>
           <div class="section-content">
             <div class="sub-header">内置 Skills</div>
-            <div class="row"><span class="key">/simplify</span> <span class="desc">代码评审（3 个并行 agent）</span></div>
-            <div class="row"><span class="key">/batch</span> <span class="desc">大规模并行改动（5-30 worktrees）</span></div>
-            <div class="row"><span class="key">/debug [desc]</span> <span class="desc">从 debug log 排查问题</span></div>
-            <div class="row"><span class="key">/loop [interval]</span> <span class="desc">周期任务 skill</span></div>
-            <div class="row"><span class="key">/claude-api</span> <span class="desc">加载 API / SDK 参考</span></div>
+            ${row('/simplify', '代码评审（3 个并行 agent）')}
+            ${row('/batch', '大规模并行改动（5-30 worktrees）')}
+            ${row('/debug [desc]', '从 debug log 排查问题')}
+            ${row('/loop [interval]', '周期任务 skill')}
+            ${row('/claude-api', '加载 API / SDK 参考')}
             <div class="sub-header">自定义 Skill 位置</div>
-            <div class="row"><span class="key">.claude/skills/&lt;name&gt;/</span> <span class="desc">项目技能</span></div>
-            <div class="row"><span class="key">~/.claude/skills/&lt;name&gt;/</span> <span class="desc">个人技能</span></div>
+            ${row('.claude/skills/<name>/', '项目技能')}
+            ${row('~/.claude/skills/<name>/', '个人技能')}
             <div class="sub-header">Skill Frontmatter</div>
-            <div class="row"><span class="key">description</span> <span class="desc">自动触发描述</span></div>
-            <div class="row"><span class="key">allowed-tools</span> <span class="desc">跳过权限确认</span></div>
-            <div class="row"><span class="key">model</span> <span class="desc">指定 skill 使用模型</span></div>
-            <div class="row"><span class="key">effort</span> <span class="desc">覆盖默认 effort<span class="badge-new">NEW</span></span></div>
-            <div class="row"><span class="key">context: fork</span> <span class="desc">在子 agent 中运行</span></div>
+            ${row('description', '自动触发描述')}
+            ${row('allowed-tools', '跳过权限确认')}
+            ${row('model', '指定 skill 使用模型')}
+            ${row('effort', '覆盖默认 effort<span class="badge-new">NEW</span>')}
+            ${row('context: fork', '在子 agent 中运行')}
             <div class="sub-header">内置 Agents</div>
-            <div class="row"><span class="key">Explore</span> <span class="desc">快速只读探索（Haiku）</span></div>
-            <div class="row"><span class="key">Plan</span> <span class="desc">计划模式研究 agent</span></div>
-            <div class="row"><span class="key">General</span> <span class="desc">全工具复杂任务</span></div>
-            <div class="row"><span class="key">Bash</span> <span class="desc">独立终端上下文 agent</span></div>
+            ${row('Explore', '快速只读探索（Haiku）')}
+            ${row('Plan', '计划模式研究 agent')}
+            ${row('General', '全工具复杂任务')}
+            ${row('Bash', '独立终端上下文 agent')}
           </div>
         </section>
 
@@ -340,28 +334,28 @@ const html = (ctx) => `<!DOCTYPE html>
           <div class="section-header">🖥️ CLI 与 Flags</div>
           <div class="section-content">
             <div class="sub-header">核心命令</div>
-            <div class="row"><span class="key">claude</span> <span class="desc">交互式模式</span></div>
-            <div class="row"><span class="key">claude "q"</span> <span class="desc">带 prompt 启动</span></div>
-            <div class="row"><span class="key">claude -p "q"</span> <span class="desc">无头模式</span></div>
-            <div class="row"><span class="key">claude -c</span> <span class="desc">续上次会话</span></div>
-            <div class="row"><span class="key">claude -r "n"</span> <span class="desc">按名字恢复</span></div>
-            <div class="row"><span class="key">claude update</span> <span class="desc">更新 Claude Code</span></div>
+            ${row('claude', '交互式模式')}
+            ${row('claude "q"', '带 prompt 启动')}
+            ${row('claude -p "q"', '无头模式')}
+            ${row('claude -c', '续上次会话')}
+            ${row('claude -r "n"', '按名字恢复')}
+            ${row('claude update', '更新 Claude Code')}
             <div class="sub-header">关键参数</div>
-            <div class="row"><span class="key">--model</span> <span class="desc">指定模型</span></div>
-            <div class="row"><span class="key">-w</span> <span class="desc">Git worktree</span></div>
-            <div class="row"><span class="key">-n / --name</span> <span class="desc">会话命名</span></div>
-            <div class="row"><span class="key">--add-dir</span> <span class="desc">附加工作目录</span></div>
-            <div class="row"><span class="key">--agent</span> <span class="desc">使用指定 agent</span></div>
-            <div class="row"><span class="key">--allowedTools</span> <span class="desc">预批准工具</span></div>
-            <div class="row"><span class="key">--output-format</span> <span class="desc">json / stream</span></div>
-            <div class="row"><span class="key">--json-schema</span> <span class="desc">结构化输出</span></div>
-            <div class="row"><span class="key">--max-turns</span> <span class="desc">限制 agent 轮数</span></div>
-            <div class="row"><span class="key">--max-budget-usd</span> <span class="desc">成本上限</span></div>
-            <div class="row"><span class="key">--console</span> <span class="desc">使用 Anthropic Console 认证</span></div>
-            <div class="row"><span class="key">--bare</span> <span class="desc">极简无头模式<span class="badge-new">NEW</span></span></div>
-            <div class="row"><span class="key">--channels</span> <span class="desc">权限中继 / MCP 推送<span class="badge-new">NEW</span></span></div>
-            <div class="row"><span class="key">--permission-mode</span> <span class="desc">plan / default / ...</span></div>
-            <div class="row"><span class="key">--dangerously-skip-permissions</span> <span class="desc">跳过所有权限确认 ⚠️</span></div>
+            ${row('--model', '指定模型')}
+            ${row('-w', 'Git worktree')}
+            ${row('-n / --name', '会话命名')}
+            ${row('--add-dir', '附加工作目录')}
+            ${row('--agent', '使用指定 agent')}
+            ${row('--allowedTools', '预批准工具')}
+            ${row('--output-format', 'json / stream')}
+            ${row('--json-schema', '结构化输出')}
+            ${row('--max-turns', '限制 agent 轮数')}
+            ${row('--max-budget-usd', '成本上限')}
+            ${row('--console', '使用 Anthropic Console 认证')}
+            ${row('--bare', '极简无头模式<span class="badge-new">NEW</span>')}
+            ${row('--channels', '权限中继 / MCP 推送<span class="badge-new">NEW</span>')}
+            ${row('--permission-mode', 'plan / default / ...')}
+            ${row('--dangerously-skip-permissions', '跳过所有权限确认 ⚠️')}
           </div>
         </section>
       </div>
@@ -386,17 +380,16 @@ const html = (ctx) => `<!DOCTYPE html>
       </div>
     </footer>
   </div>
+  <script src="./script.js"></script>
 </body>
 </html>`;
 
 const run = async () => {
   await fs.mkdir(publicDir, { recursive: true });
   await fs.mkdir(dataDir, { recursive: true });
-
   const changelogRaw = await fetchMarkdown('https://code.claude.com/docs/en/changelog');
   const changelog = focusMainContent(stripBoilerplate(changelogRaw), 'Changelog');
   await fs.writeFile(path.join(dataDir, 'changelog.md'), changelog);
-  data.changelogBlocks = pickVersionBlocks(changelog, 6);
   await fs.writeFile(path.join(publicDir, 'site-data.json'), JSON.stringify(data, null, 2));
   await fs.writeFile(path.join(publicDir, 'index.html'), html(data));
 };
