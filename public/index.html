@@ -1,196 +1,147 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Claude Code 中文速查站</title>
-  <meta name="description" content="面向中文开发者的 Claude Code 单页速查与周更摘要。" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code 命令速查表（中文）</title>
+  <meta name="description" content="高密度、多分栏、默认中文的 Claude Code 单页速查表，按周自动重建。">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⌨️</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <div class="shell">
-    <header class="hero">
+  <div class="page">
+    <header class="header">
       <div>
-        <p class="kicker">面向中文开发者的单页导航</p>
-        <h1>Claude Code 中文速查站</h1>
-        <p class="summary">不是原站镜像，而是把官方文档、更新日志和常用工作流重组为“先上手、再提效、最后调优”的中文单页。保留高密度速查表气质，但做成更适合移动端滚动阅读的卡片式结构。</p>
+        <h1>Claude Code 命令速查表</h1>
+        <p class="subtitle">中文重写版 · 高密度速查 · 周更自动重建</p>
       </div>
-      <div class="meta-card">
-        <div><span>生成时间</span><strong>2026/3/25 05:14:55</strong></div>
-        <div><span>数据源</span><strong>10 个页面</strong></div>
-        <div><span>更新策略</span><strong>每周全量重建</strong></div>
+      <div class="header-meta">
+        <span class="version-info">官方文档驱动 · 默认中文</span>
+        <span class="last-updated">更新于 2026/3/25 05:22:55</span>
       </div>
     </header>
 
-    <nav class="toc">
-      <a href="#start">上手最快</a><a href="#workflow">高频工作流</a><a href="#config">配置速记</a>
-      <a href="#changelog">最近更新</a>
-      <a href="#sources">数据来源</a>
-    </nav>
+    <section class="changelog-banner">
+      <div class="banner-title">📌 站点说明</div>
+      <div class="banner-copy">保留 cc.storyfox.cz 的速查表阅读形态：多分栏、卡片密集、查了就走；但内容来源改为官方文档与 changelog，文案按中文开发者习惯重组。</div>
+    </section>
 
-    <main class="grid">
+    <main class="main-grid">
       
-        <section id="start" class="panel">
-          <div class="panel-head">
-            <h2>上手最快</h2>
-            <p>先解决“怎么装、在哪用、第一步做什么”。</p>
-          </div>
-          <div class="card-grid">
-            
-              <article class="card">
-                <h3>安装与入口</h3>
-                <p>优先从 Terminal CLI 开始：进入项目目录后运行 claude。桌面端适合多会话与定时任务，VS Code/JetBrains 适合编辑器内协作。</p>
-                <ul><li>Terminal</li><li>VS Code</li><li>Desktop app</li><li>Web</li><li>JetBrains</li><li>Native Install (Recommended)</li><li>Homebrew</li><li>WinGet</li></ul>
-              </article>
-            
-              <article class="card">
-                <h3>开局三件事</h3>
-                <p>先登录、让它看懂仓库、再给一个明确目标。中文开发者最常见的正确姿势，是把任务写成“目标 + 约束 + 验收”。</p>
-                <ul><li>A terminal or command prompt open</li><li>If you’ve never used the terminal before, check out the terminal guide</li><li>A code project to work with</li><li>A Claude subscription (Pro, Max, Teams, or Enterprise), Claude Console account, or access through a supported cloud provider</li><li>Native Install (Recommended)</li><li>Homebrew</li><li>WinGet</li><li>Claude Pro, Max, Teams, or Enterprise (recommended)</li></ul>
-              </article>
-            
-          </div>
-        </section>
-      
-        <section id="workflow" class="panel">
-          <div class="panel-head">
-            <h2>高频工作流</h2>
-            <p>把散落的文档信息，折叠成几个最常见工作面。</p>
-          </div>
-          <div class="card-grid">
-            
-              <article class="card">
-                <h3>需求实现 / Bug 修复</h3>
-                <p>适合从小任务切入：先让 Claude Code 理解相关文件，再要求它给计划、改代码、跑测试、解释变更。</p>
-                <ul><li>Start with broad questions, then narrow down to specific areas</li><li>Ask about coding conventions and patterns used in the project</li><li>Request a glossary of project-specific terms</li><li>Be specific about what you’re looking for</li><li>Use domain language from the project</li><li>Install a code intelligence plugin for your language to give Claude precise “go to definition” and “find references” navigation</li><li>Tell Claude the command to reproduce the issue and get a stack trace</li><li>Mention any steps to reproduce the error</li></ul>
-              </article>
-            
-              <article class="card">
-                <h3>提效原则</h3>
-                <p>高质量提示词通常包含：背景、目标、限制、输出形式、是否允许执行命令。把“少问多做”和“不要越权”同时写清楚。</p>
-                <ul><li>**Reference files with @** instead of describing where code lives. Claude reads the file before responding.</li><li>**Paste images directly**. Copy/paste or drag and drop images into the prompt.</li><li>**Give URLs** for documentation and API references. Use /permissions to allowlist frequently-used domains.</li><li>**Pipe in data** by running cat error.log | claude to send file contents directly.</li><li>**Let Claude fetch what it needs**. Tell Claude to pull context itself using Bash commands, MCP tools, or by reading files.</li><li>Use ES modules (import/export) syntax, not CommonJS (require)</li><li>Destructure imports when possible (eg. import { foo } from 'bar')</li><li>Be sure to typecheck when you're done making a series of code changes</li></ul>
-              </article>
-            
-              <article class="card">
-                <h3>记忆与权限</h3>
-                <p>Memory 适合放稳定规则；Permission modes 决定执行边界。团队场景里，越明确权限边界，越能减少来回确认。</p>
-                <ul><li>**CLAUDE.md files**: instructions you write to give Claude persistent context</li><li>**Auto memory**: notes Claude writes itself based on your corrections and preferences</li><li>Write and organize CLAUDE.md files</li><li>Scope rules to specific file types with .claude/rules/</li><li>Switch modes during a session, at startup, or as a default</li><li>Choose a mode based on what Claude should be able to do without asking</li><li>Run auto mode with background safety checks, and see what it blocks by default</li><li>Plan changes read-only before approving edits</li></ul>
-              </article>
-            
-          </div>
-        </section>
-      
-        <section id="config" class="panel">
-          <div class="panel-head">
-            <h2>配置速记</h2>
-            <p>需要的时候查，不需要时不打扰。</p>
-          </div>
-          <div class="card-grid">
-            
-              <article class="card">
-                <h3>Settings / 配置项</h3>
-                <p>常见关注点包括模型、默认行为、工具接入与环境偏好。站点里只保留中文开发者最常查的认知层摘要。</p>
-                <ul><li>Security policies that must be enforced organization-wide</li><li>Compliance requirements that can’t be overridden</li><li>Standardized configurations deployed by IT/DevOps</li><li>Personal preferences you want everywhere (themes, editor settings)</li><li>Tools and plugins you use across all projects</li><li>API keys and authentication (stored securely)</li><li>Team-shared settings (permissions, hooks, MCP servers)</li><li>Plugins the whole team should have</li></ul>
-              </article>
-            
-              <article class="card">
-                <h3>CLI / 命令参考</h3>
-                <p>CLI Reference 很长，本页不逐条照搬，而是把常见入口、命令心智和查阅路径压缩成速查片段。</p>
-                <ul><li>Chrome extension - Browser automation and web testing</li><li>Interactive mode - Shortcuts, input modes, and interactive features</li><li>Quickstart guide - Getting started with Claude Code</li><li>Common workflows - Advanced workflows and patterns</li><li>Settings - Configuration options</li><li>Agent SDK documentation - Programmatic usage and integrations</li></ul>
-              </article>
-            
-          </div>
-        </section>
-      
-
-      <section id="changelog" class="panel wide">
-        <div class="panel-head">
-          <h2>最近版本更新</h2>
-          <p>从官方 changelog 抓取后，压缩成中文开发者更关心的“版本号 + 关键点”。</p>
-        </div>
-        <div class="timeline">
+        <div class="column">
           
-            <article class="version-card">
-              <div class="version-badge">v2.1.81</div>
-              <ul><li>Added --bare flag for scripted -p calls — skips hooks, LSP, plugin sync, and skill directory walks; requires ANTHROPIC_API_KEY or an apiKeyHelper via --settings (OAuth and keychain auth disabled); auto-memory fully disabled</li><li>Added --channels permission relay — channel servers that declare the permission capability can forward tool approval prompts to your phone</li><li>Fixed multiple concurrent Claude Code sessions requiring repeated re-authentication when one session refreshes its OAuth token</li><li>Fixed voice mode silently swallowing retry failures and showing a misleading “check your network” message instead of the actual error</li><li>Fixed voice mode audio not recovering when the server silently drops the WebSocket connection</li></ul>
-            </article>
+            <section class="section section-keyboard">
+              <div class="section-header">⌨️ 快速上手</div>
+              <div class="section-body">
+                <p class="section-intro">先安装，再进入项目，再开始会话。</p>
+                <ul class="dense-list"><li>curl -fsSL https://claude.ai/install.sh | bash</li><li>irm https://claude.ai/install.ps1 | iex</li><li>curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd</li><li>brew install --cask claude-code</li><li>winget install Anthropic.ClaudeCode</li><li>进入项目目录后运行：claude</li><li>首次使用先登录，再给目标 + 约束 + 验收</li></ul>
+                
+              </div>
+            </section>
           
-            <article class="version-card">
-              <div class="version-badge">v2.1.80</div>
-              <ul><li>Added rate_limits field to statusline scripts for displaying Claude.ai rate limit usage (5-hour and 7-day windows with used_percentage and resets_at)</li><li>Added source: 'settings' plugin marketplace source — declare plugin entries inline in settings.json</li><li>Added CLI tool usage detection to plugin tips, in addition to file pattern matching</li><li>Added effort frontmatter support for skills and slash commands to override the model effort level when invoked</li><li>Added --channels (research preview) — allow MCP servers to push messages into your session</li></ul>
-            </article>
-          
-            <article class="version-card">
-              <div class="version-badge">v2.1.79</div>
-              <ul><li>Added --console flag to claude auth login for Anthropic Console (API billing) authentication</li><li>Added “Show turn duration” toggle to the /config menu</li><li>Fixed claude -p hanging when spawned as a subprocess without explicit stdin (e.g. Python subprocess.run)</li><li>Fixed Ctrl+C not working in -p (print) mode</li><li>Fixed /btw returning the main agent’s output instead of answering the side question when triggered during streaming</li></ul>
-            </article>
-          
-            <article class="version-card">
-              <div class="version-badge">v2.1.78</div>
-              <ul><li>Added StopFailure hook event that fires when the turn ends due to an API error (rate limit, auth failure, etc.)</li><li>Added ${CLAUDE_PLUGIN_DATA} variable for plugin persistent state that survives plugin updates; /plugin uninstall prompts before deleting it</li><li>Added effort, maxTurns, and disallowedTools frontmatter support for plugin-shipped agents</li><li>Terminal notifications (iTerm2/Kitty/Ghostty popups, progress bar) now reach the outer terminal when running inside tmux with set -g allow-passthrough on</li><li>Response text now streams line-by-line as it’s generated</li></ul>
-            </article>
-          
-            <article class="version-card">
-              <div class="version-badge">v2.1.77</div>
-              <ul><li>Increased default maximum output token limits for Claude Opus 4.6 to 64k tokens, and the upper bound for Opus 4.6 and Sonnet 4.6 models to 128k tokens</li><li>Added allowRead sandbox filesystem setting to re-allow read access within denyRead regions</li><li>/copy now accepts an optional index: /copy N copies the Nth-latest assistant response</li><li>Fixed “Always Allow” on compound bash commands (e.g. cd src && npm test) saving a single rule for the full string instead of per-subcommand, leading to dead rules and repeated permission prompts</li><li>Fixed auto-updater starting overlapping binary downloads when the slash-command overlay repeatedly opened and closed, accumulating tens of gigabytes of memory</li></ul>
-            </article>
-          
-            <article class="version-card">
-              <div class="version-badge">v2.1.76</div>
-              <ul><li>Added MCP elicitation support — MCP servers can now request structured input mid-task via an interactive dialog (form fields or browser URL)</li><li>Added new Elicitation and ElicitationResult hooks to intercept and override responses before they’re sent back</li><li>Added -n / --name <name> CLI flag to set a display name for the session at startup</li><li>Added worktree.sparsePaths setting for claude --worktree in large monorepos to check out only the directories you need via git sparse-checkout</li><li>Added PostCompact hook that fires after compaction completes</li></ul>
-            </article>
-          
-            <article class="version-card">
-              <div class="version-badge">v2.1.75</div>
-              <ul><li>Added 1M context window for Opus 4.6 by default for Max, Team, and Enterprise plans (previously required extra usage)</li><li>Added /color command for all users to set a prompt-bar color for your session</li><li>Added session name display on the prompt bar when using /rename</li><li>Added last-modified timestamps to memory files, helping Claude reason about which memories are fresh vs. stale</li><li>Added hook source display (settings/plugin/skill) in permission prompts when a hook requires confirmation</li></ul>
-            </article>
-          
-            <article class="version-card">
-              <div class="version-badge">v2.1.74</div>
-              <ul><li>Added actionable suggestions to /context command — identifies context-heavy tools, memory bloat, and capacity warnings with specific optimization tips</li><li>Added autoMemoryDirectory setting to configure a custom directory for auto-memory storage</li><li>Fixed memory leak where streaming API response buffers were not released when the generator was terminated early, causing unbounded RSS growth on the Node.js/npm code path</li><li>Fixed managed policy ask rules being bypassed by user allow rules or skill allowed-tools</li><li>Fixed full model IDs (e.g., claude-opus-4-5) being silently ignored in agent frontmatter model: field and --agents JSON config — agents now accept the same model values as --model</li></ul>
-            </article>
-          
-            <article class="version-card">
-              <div class="version-badge">v2.1.73</div>
-              <ul><li>Added modelOverrides setting to map model picker entries to custom provider model IDs (e.g. Bedrock inference profile ARNs)</li><li>Added actionable guidance when OAuth login or connectivity checks fail due to SSL certificate errors (corporate proxies, NODE_EXTRA_CA_CERTS)</li><li>Fixed freezes and 100% CPU loops triggered by permission prompts for complex bash commands</li><li>Fixed a deadlock that could freeze Claude Code when many skill files changed at once (e.g. during git pull in a repo with a large .claude/skills/ directory)</li><li>Fixed Bash tool output being lost when running multiple Claude Code sessions in the same project directory</li></ul>
-            </article>
-          
-            <article class="version-card">
-              <div class="version-badge">v2.1.72</div>
-              <ul><li>Fixed tool search to activate even with ANTHROPIC_BASE_URL as long as ENABLE_TOOL_SEARCH is set.</li><li>Added w key in /copy to write the focused selection directly to a file, bypassing the clipboard (useful over SSH)</li><li>Added optional description argument to /plan (e.g., /plan fix the auth bug) that enters plan mode and immediately starts</li><li>Added ExitWorktree tool to leave an EnterWorktree session</li><li>Added CLAUDE_CODE_DISABLE_CRON environment variable to immediately stop scheduled cron jobs mid-session</li></ul>
-            </article>
-          
-            <article class="version-card">
-              <div class="version-badge">v2.1.71</div>
-              <ul><li>Added /loop command to run a prompt or slash command on a recurring interval (e.g. /loop 5m check the deploy)</li><li>Added cron scheduling tools for recurring prompts within a session</li><li>Added voice:pushToTalk keybinding to make the voice activation key rebindable in keybindings.json (default: space) — modifier+letter combos like meta+k have zero typing interference</li><li>Added fmt, comm, cmp, numfmt, expr, test, printf, getconf, seq, tsort, and pr to the bash auto-approval allowlist</li><li>Fixed stdin freeze in long-running sessions where keystrokes stop being processed but the process stays alive</li></ul>
-            </article>
-          
-            <article class="version-card">
-              <div class="version-badge">v2.1.70</div>
-              <ul><li>Fixed API 400 errors when using ANTHROPIC_BASE_URL with a third-party gateway — tool search now correctly detects proxy endpoints and disables tool_reference blocks</li><li>Fixed API Error: 400 This model does not support the effort parameter when using custom Bedrock inference profiles or other model identifiers not matching standard Claude naming patterns</li><li>Fixed empty model responses immediately after ToolSearch — the server renders tool schemas with system-prompt-style tags at the prompt tail, which could confuse models into stopping early</li><li>Fixed prompt-cache bust when an MCP server with instructions connects after the first turn</li><li>Fixed Enter inserting a newline instead of submitting when typing over a slow SSH connection</li></ul>
-            </article>
+            <section class="section section-mcp">
+              <div class="section-header">⚡ 常见工作流</div>
+              <div class="section-body">
+                <p class="section-intro">最值得高频复用的 Claude Code 使用方式。</p>
+                <ul class="dense-list"><li>理解新仓库：先总览，再定位模块，再问术语表</li></ul>
+                
+              </div>
+            </section>
           
         </div>
-      </section>
-
-      <section id="sources" class="panel wide footer-panel">
-        <div class="panel-head">
-          <h2>数据来源与说明</h2>
-          <p>站点只消费公开可访问页面；页面文案为中文重写与重组，不是直接镜像。</p>
+      
+        <div class="column">
+          
+            <section class="section section-slash">
+              <div class="section-header">⚡ 提示词写法</div>
+              <div class="section-body">
+                <p class="section-intro">Claude Code 吃“上下文完整、边界明确”的任务描述。</p>
+                <ul class="dense-list"><li>推荐结构：背景 / 目标 / 限制 / 输出 / 验收</li><li>**Reference files with @** instead of describing where code lives. Claude reads the file before responding.</li><li>**Paste images directly**. Copy/paste or drag and drop images into the prompt.</li><li>**Give URLs** for documentation and API references. Use /permissions to allowlist frequently-used domains.</li><li>**Pipe in data** by running cat error.log | claude to send file contents directly.</li><li>**Let Claude fetch what it needs**. Tell Claude to pull context itself using Bash commands, MCP tools, or by reading files.</li><li>Use ES modules (import/export) syntax, not CommonJS (require)</li><li>Destructure imports when possible (eg. import { foo } from 'bar')</li></ul>
+                
+              </div>
+            </section>
+          
+            <section class="section section-memory">
+              <div class="section-header">📁 Memory 与权限</div>
+              <div class="section-body">
+                <p class="section-intro">把稳定规则写入记忆，把执行边界交给权限模式。</p>
+                <ul class="dense-list"><li>**CLAUDE.md files**: instructions you write to give Claude persistent context</li><li>**Auto memory**: notes Claude writes itself based on your corrections and preferences</li><li>Write and organize CLAUDE.md files</li><li>Scope rules to specific file types with .claude/rules/</li><li>Switch modes during a session, at startup, or as a default</li><li>Choose a mode based on what Claude should be able to do without asking</li><li>Run auto mode with background safety checks, and see what it blocks by default</li><li>Plan changes read-only before approving edits</li></ul>
+                
+              </div>
+            </section>
+          
         </div>
-        <div class="notes">
-          <p>内容每周全量抓取并重建，不做差量 patch。</p><p>官方文档通过 r.jina.ai 做只读镜像提取，避免依赖浏览器自动化。</p><p>cc.storyfox.cz 仅作为信息架构参考，不直接镜像文案。</p>
+      
+        <div class="column">
+          
+            <section class="section section-workflows">
+              <div class="section-header">🧠 配置速记</div>
+              <div class="section-body">
+                <p class="section-intro">只留中文开发者最常碰到的配置概念。</p>
+                <ul class="dense-list"><li>Policies deployed by IT through server delivery, MDM configuration profiles, registry policies, or managed settings files</li><li>Cannot be overridden by any other level, including command line arguments</li><li>Within the managed tier, precedence is: server-managed > MDM/OS-level policies >managed-settings.json> HKCU registry (Windows only). Only one managed source is used; sources do not merge.</li><li>Temporary overrides for a specific session</li><li>Personal project-specific settings</li><li>Team-shared project settings in source control</li><li>Personal global settings</li><li>**Memory files (CLAUDE.md)**: Contain instructions and context that Claude loads at startup</li></ul>
+                
+              </div>
+            </section>
+          
+            <section class="section section-config">
+              <div class="section-header">⚙️ CLI / Flags</div>
+              <div class="section-body">
+                <p class="section-intro">不是全量手册，而是常见入口心智。</p>
+                <ul class="dense-list"><li>claude：启动交互式会话</li><li>claude -p：非交互/脚本模式</li><li>claude --version：查看版本</li><li>Chrome extension - Browser automation and web testing</li><li>Interactive mode - Shortcuts, input modes, and interactive features</li><li>Quickstart guide - Getting started with Claude Code</li><li>Common workflows - Advanced workflows and patterns</li><li>Settings - Configuration options</li></ul>
+                
+              </div>
+            </section>
+          
         </div>
-        <ul class="source-list">
-          <li><a href="https://code.claude.com/docs/en/overview" target="_blank" rel="noreferrer">官方 Overview</a></li><li><a href="https://code.claude.com/docs/en/quickstart" target="_blank" rel="noreferrer">官方 Quickstart</a></li><li><a href="https://code.claude.com/docs/en/common-workflows" target="_blank" rel="noreferrer">官方 Common workflows</a></li><li><a href="https://code.claude.com/docs/en/best-practices" target="_blank" rel="noreferrer">官方 Best practices</a></li><li><a href="https://code.claude.com/docs/en/memory" target="_blank" rel="noreferrer">官方 Memory</a></li><li><a href="https://code.claude.com/docs/en/permission-modes" target="_blank" rel="noreferrer">官方 Permission modes</a></li><li><a href="https://code.claude.com/docs/en/settings" target="_blank" rel="noreferrer">官方 Settings</a></li><li><a href="https://code.claude.com/docs/en/cli-reference" target="_blank" rel="noreferrer">官方 CLI reference</a></li><li><a href="https://code.claude.com/docs/en/changelog" target="_blank" rel="noreferrer">官方 Changelog</a></li><li><a href="https://cc.storyfox.cz/" target="_blank" rel="noreferrer">参考：cc.storyfox.cz</a></li>
-        </ul>
-      </section>
+      
+        <div class="column">
+          
+            <section class="section section-skills">
+              <div class="section-header">🔧 开局清单</div>
+              <div class="section-body">
+                <p class="section-intro">第一次使用最容易忽略的动作。</p>
+                <ul class="dense-list"><li>A terminal or command prompt open</li><li>If you’ve never used the terminal before, check out the terminal guide</li><li>A code project to work with</li><li>A Claude subscription (Pro, Max, Teams, or Enterprise), Claude Console account, or access through a supported cloud provider</li><li>Native Install (Recommended)</li><li>Homebrew</li><li>WinGet</li><li>Claude Pro, Max, Teams, or Enterprise (recommended)</li></ul>
+                
+              </div>
+            </section>
+          
+            <section class="section section-cli">
+              <div class="section-header">🖥️ 最近更新</div>
+              <div class="section-body">
+                <p class="section-intro">来自官方 changelog 的最近版本片段。</p>
+                
+                <div class="version-stack"><article class="version-item"><div class="version-name">v2.1.81</div><ul class="dense-list"><li>Added --bare flag for scripted -p calls — skips hooks, LSP, plugin sync, and skill directory walks; requires ANTHROPIC_API_KEY or an apiKeyHelper via --settings (OAuth and keychain auth disabled); auto-memory fully disabled</li><li>Added --channels permission relay — channel servers that declare the permission capability can forward tool approval prompts to your phone</li><li>Fixed multiple concurrent Claude Code sessions requiring repeated re-authentication when one session refreshes its OAuth token</li></ul></article><article class="version-item"><div class="version-name">v2.1.80</div><ul class="dense-list"><li>Added rate_limits field to statusline scripts for displaying Claude.ai rate limit usage (5-hour and 7-day windows with used_percentage and resets_at)</li><li>Added source: 'settings' plugin marketplace source — declare plugin entries inline in settings.json</li><li>Added CLI tool usage detection to plugin tips, in addition to file pattern matching</li></ul></article><article class="version-item"><div class="version-name">v2.1.79</div><ul class="dense-list"><li>Added --console flag to claude auth login for Anthropic Console (API billing) authentication</li><li>Added “Show turn duration” toggle to the /config menu</li><li>Fixed claude -p hanging when spawned as a subprocess without explicit stdin (e.g. Python subprocess.run)</li></ul></article><article class="version-item"><div class="version-name">v2.1.78</div><ul class="dense-list"><li>Added StopFailure hook event that fires when the turn ends due to an API error (rate limit, auth failure, etc.)</li><li>Added ${CLAUDE_PLUGIN_DATA} variable for plugin persistent state that survives plugin updates; /plugin uninstall prompts before deleting it</li><li>Added effort, maxTurns, and disallowedTools frontmatter support for plugin-shipped agents</li></ul></article><article class="version-item"><div class="version-name">v2.1.77</div><ul class="dense-list"><li>Increased default maximum output token limits for Claude Opus 4.6 to 64k tokens, and the upper bound for Opus 4.6 and Sonnet 4.6 models to 128k tokens</li><li>Added allowRead sandbox filesystem setting to re-allow read access within denyRead regions</li><li>/copy now accepts an optional index: /copy N copies the Nth-latest assistant response</li></ul></article><article class="version-item"><div class="version-name">v2.1.76</div><ul class="dense-list"><li>Added MCP elicitation support — MCP servers can now request structured input mid-task via an interactive dialog (form fields or browser URL)</li><li>Added new Elicitation and ElicitationResult hooks to intercept and override responses before they’re sent back</li><li>Added -n / --name <name> CLI flag to set a display name for the session at startup</li></ul></article></div>
+              </div>
+            </section>
+          
+        </div>
+      
     </main>
+
+    <section class="bottom-grid">
+      
+        <section class="section section-dense bottom-card">
+          <div class="section-header">中文开发者默认心智</div>
+          <div class="section-body">
+            <div class="kv-table">
+              <div class="kv-row"><div class="kv-key">起步入口</div><div class="kv-value">先用 Terminal CLI，最稳、最全</div></div><div class="kv-row"><div class="kv-key">任务写法</div><div class="kv-value">目标 + 约束 + 验收</div></div><div class="kv-row"><div class="kv-key">适合交给它</div><div class="kv-value">读代码、改代码、跑命令、整理方案</div></div><div class="kv-row"><div class="kv-key">不该模糊的点</div><div class="kv-value">是否能执行命令、是否能改文件、输出格式</div></div><div class="kv-row"><div class="kv-key">长期规则放哪</div><div class="kv-value">CLAUDE.md / Memory</div></div><div class="kv-row"><div class="kv-key">周更来源</div><div class="kv-value">官方 changelog + 官方公开文档</div></div>
+            </div>
+          </div>
+        </section>
+      
+
+      <section class="section section-cli bottom-card">
+        <div class="section-header">🔎 数据来源</div>
+        <div class="section-body">
+          <ul class="dense-list"><li>官方 Overview → https://code.claude.com/docs/en/overview</li><li>官方 Quickstart → https://code.claude.com/docs/en/quickstart</li><li>官方 Common workflows → https://code.claude.com/docs/en/common-workflows</li><li>官方 Best practices → https://code.claude.com/docs/en/best-practices</li><li>官方 Memory → https://code.claude.com/docs/en/memory</li><li>官方 Permission modes → https://code.claude.com/docs/en/permission-modes</li><li>官方 Settings → https://code.claude.com/docs/en/settings</li><li>官方 CLI reference → https://code.claude.com/docs/en/cli-reference</li><li>官方 Changelog → https://code.claude.com/docs/en/changelog</li><li>参考：cc.storyfox.cz → https://cc.storyfox.cz/</li></ul>
+          <div class="notes"><p>本站不是官网翻译镜像，而是速查表形态的中文重写。</p><p>每周 workflow 会全量抓取公开页面并重建整个页面。</p><p>cc.storyfox.cz 仅参考布局与阅读风格，不直接复制原文。</p></div>
+        </div>
+      </section>
+    </section>
   </div>
-  <script>window.__SITE_DATA__ = {"meta":{"title":"Claude Code 中文速查站","description":"面向中文开发者的 Claude Code 单页速查与周更摘要。","generatedAt":"2026-03-25T05:14:55.751Z","sourceCount":10},"hero":{"kicker":"面向中文开发者的单页导航","title":"Claude Code 中文速查站","summary":"不是原站镜像，而是把官方文档、更新日志和常用工作流重组为“先上手、再提效、最后调优”的中文单页。保留高密度速查表气质，但做成更适合移动端滚动阅读的卡片式结构。"},"sections":[{"id":"start","name":"上手最快","intro":"先解决“怎么装、在哪用、第一步做什么”。","cards":[{"title":"安装与入口","body":"优先从 Terminal CLI 开始：进入项目目录后运行 claude。桌面端适合多会话与定时任务，VS Code/JetBrains 适合编辑器内协作。","bullets":["Terminal","VS Code","Desktop app","Web","JetBrains","Native Install (Recommended)","Homebrew","WinGet"]},{"title":"开局三件事","body":"先登录、让它看懂仓库、再给一个明确目标。中文开发者最常见的正确姿势，是把任务写成“目标 + 约束 + 验收”。","bullets":["A terminal or command prompt open","If you’ve never used the terminal before, check out the terminal guide","A code project to work with","A Claude subscription (Pro, Max, Teams, or Enterprise), Claude Console account, or access through a supported cloud provider","Native Install (Recommended)","Homebrew","WinGet","Claude Pro, Max, Teams, or Enterprise (recommended)"]}]},{"id":"workflow","name":"高频工作流","intro":"把散落的文档信息，折叠成几个最常见工作面。","cards":[{"title":"需求实现 / Bug 修复","body":"适合从小任务切入：先让 Claude Code 理解相关文件，再要求它给计划、改代码、跑测试、解释变更。","bullets":["Start with broad questions, then narrow down to specific areas","Ask about coding conventions and patterns used in the project","Request a glossary of project-specific terms","Be specific about what you’re looking for","Use domain language from the project","Install a code intelligence plugin for your language to give Claude precise “go to definition” and “find references” navigation","Tell Claude the command to reproduce the issue and get a stack trace","Mention any steps to reproduce the error"]},{"title":"提效原则","body":"高质量提示词通常包含：背景、目标、限制、输出形式、是否允许执行命令。把“少问多做”和“不要越权”同时写清楚。","bullets":["**Reference files with @** instead of describing where code lives. Claude reads the file before responding.","**Paste images directly**. Copy/paste or drag and drop images into the prompt.","**Give URLs** for documentation and API references. Use /permissions to allowlist frequently-used domains.","**Pipe in data** by running cat error.log | claude to send file contents directly.","**Let Claude fetch what it needs**. Tell Claude to pull context itself using Bash commands, MCP tools, or by reading files.","Use ES modules (import/export) syntax, not CommonJS (require)","Destructure imports when possible (eg. import { foo } from 'bar')","Be sure to typecheck when you're done making a series of code changes"]},{"title":"记忆与权限","body":"Memory 适合放稳定规则；Permission modes 决定执行边界。团队场景里，越明确权限边界，越能减少来回确认。","bullets":["**CLAUDE.md files**: instructions you write to give Claude persistent context","**Auto memory**: notes Claude writes itself based on your corrections and preferences","Write and organize CLAUDE.md files","Scope rules to specific file types with .claude/rules/","Switch modes during a session, at startup, or as a default","Choose a mode based on what Claude should be able to do without asking","Run auto mode with background safety checks, and see what it blocks by default","Plan changes read-only before approving edits"]}]},{"id":"config","name":"配置速记","intro":"需要的时候查，不需要时不打扰。","cards":[{"title":"Settings / 配置项","body":"常见关注点包括模型、默认行为、工具接入与环境偏好。站点里只保留中文开发者最常查的认知层摘要。","bullets":["Security policies that must be enforced organization-wide","Compliance requirements that can’t be overridden","Standardized configurations deployed by IT/DevOps","Personal preferences you want everywhere (themes, editor settings)","Tools and plugins you use across all projects","API keys and authentication (stored securely)","Team-shared settings (permissions, hooks, MCP servers)","Plugins the whole team should have"]},{"title":"CLI / 命令参考","body":"CLI Reference 很长，本页不逐条照搬，而是把常见入口、命令心智和查阅路径压缩成速查片段。","bullets":["Chrome extension - Browser automation and web testing","Interactive mode - Shortcuts, input modes, and interactive features","Quickstart guide - Getting started with Claude Code","Common workflows - Advanced workflows and patterns","Settings - Configuration options","Agent SDK documentation - Programmatic usage and integrations"]}]}],"changelog":[{"version":"2.1.81","bullets":["Added --bare flag for scripted -p calls — skips hooks, LSP, plugin sync, and skill directory walks; requires ANTHROPIC_API_KEY or an apiKeyHelper via --settings (OAuth and keychain auth disabled); auto-memory fully disabled","Added --channels permission relay — channel servers that declare the permission capability can forward tool approval prompts to your phone","Fixed multiple concurrent Claude Code sessions requiring repeated re-authentication when one session refreshes its OAuth token","Fixed voice mode silently swallowing retry failures and showing a misleading “check your network” message instead of the actual error","Fixed voice mode audio not recovering when the server silently drops the WebSocket connection"]},{"version":"2.1.80","bullets":["Added rate_limits field to statusline scripts for displaying Claude.ai rate limit usage (5-hour and 7-day windows with used_percentage and resets_at)","Added source: 'settings' plugin marketplace source — declare plugin entries inline in settings.json","Added CLI tool usage detection to plugin tips, in addition to file pattern matching","Added effort frontmatter support for skills and slash commands to override the model effort level when invoked","Added --channels (research preview) — allow MCP servers to push messages into your session"]},{"version":"2.1.79","bullets":["Added --console flag to claude auth login for Anthropic Console (API billing) authentication","Added “Show turn duration” toggle to the /config menu","Fixed claude -p hanging when spawned as a subprocess without explicit stdin (e.g. Python subprocess.run)","Fixed Ctrl+C not working in -p (print) mode","Fixed /btw returning the main agent’s output instead of answering the side question when triggered during streaming"]},{"version":"2.1.78","bullets":["Added StopFailure hook event that fires when the turn ends due to an API error (rate limit, auth failure, etc.)","Added ${CLAUDE_PLUGIN_DATA} variable for plugin persistent state that survives plugin updates; /plugin uninstall prompts before deleting it","Added effort, maxTurns, and disallowedTools frontmatter support for plugin-shipped agents","Terminal notifications (iTerm2/Kitty/Ghostty popups, progress bar) now reach the outer terminal when running inside tmux with set -g allow-passthrough on","Response text now streams line-by-line as it’s generated"]},{"version":"2.1.77","bullets":["Increased default maximum output token limits for Claude Opus 4.6 to 64k tokens, and the upper bound for Opus 4.6 and Sonnet 4.6 models to 128k tokens","Added allowRead sandbox filesystem setting to re-allow read access within denyRead regions","/copy now accepts an optional index: /copy N copies the Nth-latest assistant response","Fixed “Always Allow” on compound bash commands (e.g. cd src && npm test) saving a single rule for the full string instead of per-subcommand, leading to dead rules and repeated permission prompts","Fixed auto-updater starting overlapping binary downloads when the slash-command overlay repeatedly opened and closed, accumulating tens of gigabytes of memory"]},{"version":"2.1.76","bullets":["Added MCP elicitation support — MCP servers can now request structured input mid-task via an interactive dialog (form fields or browser URL)","Added new Elicitation and ElicitationResult hooks to intercept and override responses before they’re sent back","Added -n / --name <name> CLI flag to set a display name for the session at startup","Added worktree.sparsePaths setting for claude --worktree in large monorepos to check out only the directories you need via git sparse-checkout","Added PostCompact hook that fires after compaction completes"]},{"version":"2.1.75","bullets":["Added 1M context window for Opus 4.6 by default for Max, Team, and Enterprise plans (previously required extra usage)","Added /color command for all users to set a prompt-bar color for your session","Added session name display on the prompt bar when using /rename","Added last-modified timestamps to memory files, helping Claude reason about which memories are fresh vs. stale","Added hook source display (settings/plugin/skill) in permission prompts when a hook requires confirmation"]},{"version":"2.1.74","bullets":["Added actionable suggestions to /context command — identifies context-heavy tools, memory bloat, and capacity warnings with specific optimization tips","Added autoMemoryDirectory setting to configure a custom directory for auto-memory storage","Fixed memory leak where streaming API response buffers were not released when the generator was terminated early, causing unbounded RSS growth on the Node.js/npm code path","Fixed managed policy ask rules being bypassed by user allow rules or skill allowed-tools","Fixed full model IDs (e.g., claude-opus-4-5) being silently ignored in agent frontmatter model: field and --agents JSON config — agents now accept the same model values as --model"]},{"version":"2.1.73","bullets":["Added modelOverrides setting to map model picker entries to custom provider model IDs (e.g. Bedrock inference profile ARNs)","Added actionable guidance when OAuth login or connectivity checks fail due to SSL certificate errors (corporate proxies, NODE_EXTRA_CA_CERTS)","Fixed freezes and 100% CPU loops triggered by permission prompts for complex bash commands","Fixed a deadlock that could freeze Claude Code when many skill files changed at once (e.g. during git pull in a repo with a large .claude/skills/ directory)","Fixed Bash tool output being lost when running multiple Claude Code sessions in the same project directory"]},{"version":"2.1.72","bullets":["Fixed tool search to activate even with ANTHROPIC_BASE_URL as long as ENABLE_TOOL_SEARCH is set.","Added w key in /copy to write the focused selection directly to a file, bypassing the clipboard (useful over SSH)","Added optional description argument to /plan (e.g., /plan fix the auth bug) that enters plan mode and immediately starts","Added ExitWorktree tool to leave an EnterWorktree session","Added CLAUDE_CODE_DISABLE_CRON environment variable to immediately stop scheduled cron jobs mid-session"]},{"version":"2.1.71","bullets":["Added /loop command to run a prompt or slash command on a recurring interval (e.g. /loop 5m check the deploy)","Added cron scheduling tools for recurring prompts within a session","Added voice:pushToTalk keybinding to make the voice activation key rebindable in keybindings.json (default: space) — modifier+letter combos like meta+k have zero typing interference","Added fmt, comm, cmp, numfmt, expr, test, printf, getconf, seq, tsort, and pr to the bash auto-approval allowlist","Fixed stdin freeze in long-running sessions where keystrokes stop being processed but the process stays alive"]},{"version":"2.1.70","bullets":["Fixed API 400 errors when using ANTHROPIC_BASE_URL with a third-party gateway — tool search now correctly detects proxy endpoints and disables tool_reference blocks","Fixed API Error: 400 This model does not support the effort parameter when using custom Bedrock inference profiles or other model identifiers not matching standard Claude naming patterns","Fixed empty model responses immediately after ToolSearch — the server renders tool schemas with system-prompt-style tags at the prompt tail, which could confuse models into stopping early","Fixed prompt-cache bust when an MCP server with instructions connects after the first turn","Fixed Enter inserting a newline instead of submitting when typing over a slow SSH connection"]}],"sources":[{"title":"官方 Overview","url":"https://code.claude.com/docs/en/overview"},{"title":"官方 Quickstart","url":"https://code.claude.com/docs/en/quickstart"},{"title":"官方 Common workflows","url":"https://code.claude.com/docs/en/common-workflows"},{"title":"官方 Best practices","url":"https://code.claude.com/docs/en/best-practices"},{"title":"官方 Memory","url":"https://code.claude.com/docs/en/memory"},{"title":"官方 Permission modes","url":"https://code.claude.com/docs/en/permission-modes"},{"title":"官方 Settings","url":"https://code.claude.com/docs/en/settings"},{"title":"官方 CLI reference","url":"https://code.claude.com/docs/en/cli-reference"},{"title":"官方 Changelog","url":"https://code.claude.com/docs/en/changelog"},{"title":"参考：cc.storyfox.cz","url":"https://cc.storyfox.cz/"}],"notes":["内容每周全量抓取并重建，不做差量 patch。","官方文档通过 r.jina.ai 做只读镜像提取，避免依赖浏览器自动化。","cc.storyfox.cz 仅作为信息架构参考，不直接镜像文案。"]};</script>
   <script src="./script.js"></script>
 </body>
 </html>

@@ -20,7 +20,7 @@ Claude performs dramatically better when it can verify its own work, like run te
 
 | Strategy | Before | After |
 | --- | --- | --- |
-| **Provide verification criteria** | _”implement a function that validates email addresses"_ | _"write a validateEmail function. example test cases: [[email protected]](https://code.claude.com/cdn-cgi/l/email-protection#c2b7b1a7b082a7baa3afb2aea7eca1adaf) is true, invalid is false, [[email protected]](https://code.claude.com/cdn-cgi/l/email-protection#fb8e889e89bbd5989496) is false. run the tests after implementing”_ |
+| **Provide verification criteria** | _”implement a function that validates email addresses"_ | _"write a validateEmail function. example test cases: [[email protected]](https://code.claude.com/cdn-cgi/l/email-protection#057076607745607d64687569602b666a68) is true, invalid is false, [[email protected]](https://code.claude.com/cdn-cgi/l/email-protection#d1a4a2b4a391ffb2bebc) is false. run the tests after implementing”_ |
 | **Verify UI changes visually** | _”make the dashboard look better"_ | _"[paste screenshot] implement this design. take a screenshot of the result and compare it to the original. list differences and fix them”_ |
 | **Address root causes, not symptoms** | _”the build is failing"_ | _"the build fails with this error: [paste error]. fix it and verify the build succeeds. address the root cause, don’t suppress the error”_ |
 
