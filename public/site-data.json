@@ -1,80 +1,12 @@
 {
   "version": "v2.1.81",
-  "updated": "2026-03-25T05:30:37.656Z",
+  "updated": "2026-03-25T05:39:22.622Z",
   "recentChanges": [
     "新增 --bare：用于脚本化 -p 调用的极简无头模式，不跑 hooks / LSP / 插件扫描",
     "新增 --channels：权限请求可中继到手机端，部分 MCP 消息也可推送",
     "新增 skills / slash commands 的 effort 前言字段",
     "/fork 更名为 /branch（旧别名仍兼容）",
     "SendMessage 现在可自动恢复已停止的 agent"
-  ],
-  "changelogBlocks": [
-    {
-      "version": "2.1.81",
-      "date": "March 20, 2026",
-      "bullets": [
-        "Added --bare flag for scripted -p calls — skips hooks, LSP, plugin sync, and skill directory walks; requires ANTHROPIC_API_KEY or an apiKeyHelper via --settings (OAuth and keychain auth disabled); auto-memory fully disabled",
-        "Added --channels permission relay — channel servers that declare the permission capability can forward tool approval prompts to your phone",
-        "Fixed multiple concurrent Claude Code sessions requiring repeated re-authentication when one session refreshes its OAuth token",
-        "Fixed voice mode silently swallowing retry failures and showing a misleading “check your network” message instead of the actual error",
-        "Fixed voice mode audio not recovering when the server silently drops the WebSocket connection"
-      ]
-    },
-    {
-      "version": "2.1.80",
-      "date": "March 19, 2026",
-      "bullets": [
-        "Added rate_limits field to statusline scripts for displaying Claude.ai rate limit usage (5-hour and 7-day windows with used_percentage and resets_at)",
-        "Added source: 'settings' plugin marketplace source — declare plugin entries inline in settings.json",
-        "Added CLI tool usage detection to plugin tips, in addition to file pattern matching",
-        "Added effort frontmatter support for skills and slash commands to override the model effort level when invoked",
-        "Added --channels (research preview) — allow MCP servers to push messages into your session"
-      ]
-    },
-    {
-      "version": "2.1.79",
-      "date": "March 18, 2026",
-      "bullets": [
-        "Added --console flag to claude auth login for Anthropic Console (API billing) authentication",
-        "Added “Show turn duration” toggle to the /config menu",
-        "Fixed claude -p hanging when spawned as a subprocess without explicit stdin (e.g. Python subprocess.run)",
-        "Fixed Ctrl+C not working in -p (print) mode",
-        "Fixed /btw returning the main agent’s output instead of answering the side question when triggered during streaming"
-      ]
-    },
-    {
-      "version": "2.1.78",
-      "date": "March 17, 2026",
-      "bullets": [
-        "Added StopFailure hook event that fires when the turn ends due to an API error (rate limit, auth failure, etc.)",
-        "Added ${CLAUDE_PLUGIN_DATA} variable for plugin persistent state that survives plugin updates; /plugin uninstall prompts before deleting it",
-        "Added effort, maxTurns, and disallowedTools frontmatter support for plugin-shipped agents",
-        "Terminal notifications (iTerm2/Kitty/Ghostty popups, progress bar) now reach the outer terminal when running inside tmux with set -g allow-passthrough on",
-        "Response text now streams line-by-line as it’s generated"
-      ]
-    },
-    {
-      "version": "2.1.77",
-      "date": "March 17, 2026",
-      "bullets": [
-        "Increased default maximum output token limits for Claude Opus 4.6 to 64k tokens, and the upper bound for Opus 4.6 and Sonnet 4.6 models to 128k tokens",
-        "Added allowRead sandbox filesystem setting to re-allow read access within denyRead regions",
-        "/copy now accepts an optional index: /copy N copies the Nth-latest assistant response",
-        "Fixed “Always Allow” on compound bash commands (e.g. cd src && npm test) saving a single rule for the full string instead of per-subcommand, leading to dead rules and repeated permission prompts",
-        "Fixed auto-updater starting overlapping binary downloads when the slash-command overlay repeatedly opened and closed, accumulating tens of gigabytes of memory"
-      ]
-    },
-    {
-      "version": "2.1.76",
-      "date": "March 14, 2026",
-      "bullets": [
-        "Added MCP elicitation support — MCP servers can now request structured input mid-task via an interactive dialog (form fields or browser URL)",
-        "Added new Elicitation and ElicitationResult hooks to intercept and override responses before they’re sent back",
-        "Added -n / --name <name> CLI flag to set a display name for the session at startup",
-        "Added worktree.sparsePaths setting for claude --worktree in large monorepos to check out only the directories you need via git sparse-checkout",
-        "Added PostCompact hook that fires after compaction completes"
-      ]
-    }
   ],
   "footerSources": [
     "官方变更日志：https://code.claude.com/docs/en/changelog",
