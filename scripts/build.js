@@ -268,22 +268,35 @@ const html = (ctx) => `<!DOCTYPE html>
             <div class="sub-header">Thinking 与 Effort</div>
             ${row(duo(`${keycap('Option')}${keycap('T')}`, `${keycap('Alt')}${keycap('T')}`), '开 / 关 thinking')}
             ${row('"ultrathink"', '当前轮次最大努力')}
-            ${row('/effort', 'low / med / high<span class="badge-new">NEW</span>')}
+            ${row('/effort', '○ low · ◐ med · ● high<span class="badge-new">NEW</span>')}
             <div class="sub-header">Git Worktree</div>
             ${row('--worktree name', '每个功能独立分支 / 工作树')}
             ${row('isolation: worktree', 'Agent 在独立 worktree 中运行')}
             ${row('sparsePaths', '只 checkout 必需目录<span class="badge-new">NEW</span>')}
+            ${row('/batch', '自动创建 worktrees 并并行处理')}
+            <div class="sub-header">语音模式</div>
+            ${row('/voice', '启用按住说话')}
+            ${row(`${keycap('Space')} (hold)`, '按住录音，松开发送')}
+            ${row('20 languages', '支持 EN / ES / FR / DE / CZ / PL…')}
             <div class="sub-header">上下文管理</div>
             ${row('/context', '查看使用情况和优化建议')}
             ${row('/compact [focus]', '带焦点压缩上下文')}
             ${row('Auto-compact', '约 95% 容量自动压缩')}
             ${row('1M context', 'Opus 4.6 在 Max/Team/Enterprise 可用')}
             ${row('CLAUDE.md', '压缩后仍保留')}
+            <div class="sub-header">会话进阶</div>
+            ${row('claude -c', '续接上一次对话')}
+            ${row('claude -r "name"', '按名字恢复会话')}
+            ${row('/btw question', '侧问，不占主上下文')}
             <div class="sub-header">SDK / Headless</div>
             ${row('claude -p "query"', '非交互运行')}
             ${row('--output-format json', '结构化输出')}
             ${row('--max-budget-usd 5', '设置成本上限')}
             ${row('cat file | claude -p', '管道输入')}
+            <div class="sub-header">调度与远程</div>
+            ${row('/loop 5m msg', '周期任务')}
+            ${row('/rc', '远程控制')}
+            ${row('--remote', '在 claude.ai 网页会话中运行')}
           </div>
         </section>
 
@@ -306,7 +319,9 @@ const html = (ctx) => `<!DOCTYPE html>
             ${row('CLAUDE_CODE_EFFORT_LEVEL', 'low / med / high')}
             ${row('MAX_THINKING_TOKENS', '0 表示关闭')}
             ${row('ANTHROPIC_CUSTOM_MODEL_OPTION', '给 /model 增加自定义项')}
-            ${row('CLAUDECODE', '检测是否运行在 Claude Code shell')}
+            ${row('CLAUDE_CODE_PLUGIN_SEED_DIR', '多个插件 seed 目录')}
+            ${row('CLAUDECODE', '检测是否运行在 Claude Code shell (=1)')}
+            ${row('IS_DEMO', '演示模式（隐藏邮箱/组织）')}
           </div>
         </section>
       </div>
@@ -360,10 +375,14 @@ const html = (ctx) => `<!DOCTYPE html>
             ${row('--max-turns', '限制 agent 轮数')}
             ${row('--max-budget-usd', '成本上限')}
             ${row('--console', '使用 Anthropic Console 认证')}
+            ${row('--verbose', '详细输出')}
             ${row('--bare', '极简无头模式<span class="badge-new">NEW</span>')}
             ${row('--channels', '权限中继 / MCP 推送<span class="badge-new">NEW</span>')}
-            ${row('--permission-mode', 'plan / default / ...')}
+            ${row('--remote', '网页会话模式')}
+            ${row('--effort', 'low / med / high / max')}
+            ${row('--permission-mode', 'plan / default / …')}
             ${row('--dangerously-skip-permissions', '跳过所有权限确认 ⚠️')}
+            ${row('--chrome', '启用 Chrome 集成')}
           </div>
         </section>
       </div>
@@ -381,6 +400,24 @@ const html = (ctx) => `<!DOCTYPE html>
         <span class="footer-item"><code>dontAsk</code> 未允许即拒绝</span>
         <span class="footer-sep">·</span>
         <span class="footer-item"><code>bypassPermissions</code> 全跳过</span>
+      </div>
+      <div class="footer-row">
+        <span class="footer-label">关键环境变量：</span>
+        <span class="footer-item"><code>ANTHROPIC_API_KEY</code></span>
+        <span class="footer-sep">·</span>
+        <span class="footer-item"><code>ANTHROPIC_MODEL</code></span>
+        <span class="footer-sep">·</span>
+        <span class="footer-item"><code>CLAUDE_CODE_EFFORT_LEVEL</code> (low/med/high)</span>
+        <span class="footer-sep">·</span>
+        <span class="footer-item"><code>MAX_THINKING_TOKENS</code> (0=off)</span>
+        <span class="footer-sep">·</span>
+        <span class="footer-item"><code>CLAUDE_CODE_MAX_OUTPUT_TOKENS</code> (默认 32K)</span>
+        <span class="footer-sep">·</span>
+        <span class="footer-item"><code>CLAUDE_CODE_DISABLE_CRON</code></span>
+      </div>
+      <div class="footer-row">
+        <span class="footer-label">致谢：</span>
+        <span class="footer-item">本页基于 <a href="https://cc.storyfox.cz/" target="_blank" rel="noreferrer" style="color:#FDE68A;">cc.storyfox.cz</a> 的版式与信息组织方式复刻，感谢原作者。</span>
       </div>
       <div class="footer-row">
         <span class="footer-label">数据来源：</span>
