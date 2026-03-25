@@ -172,6 +172,14 @@ const html = (ctx) => `<!DOCTYPE html>
             ${row('/', 'Slash 命令')}
             ${row('!', '直接执行 bash')}
             ${row('@', '提及文件并自动补全')}
+            <div class="sub-header">会话选择器</div>
+            ${row(duo(`${keycap('↑↓')}`, `${keycap('↑↓')}`), '上下移动选择')}
+            ${row(duo(`${keycap('←→')}`, `${keycap('←→')}`), '展开 / 折叠项目')}
+            ${row(duo(`${keycap('P')}`, `${keycap('P')}`), '预览会话内容')}
+            ${row(duo(`${keycap('R')}`, `${keycap('R')}`), '重命名会话')}
+            ${row(duo(`${keycap('/')}`, `${keycap('/')}`), '搜索会话')}
+            ${row(duo(`${keycap('A')}`, `${keycap('A')}`), '查看所有项目')}
+            ${row(duo(`${keycap('B')}`, `${keycap('B')}`), '仅查看当前分支')}
           </div>
         </section>
 
